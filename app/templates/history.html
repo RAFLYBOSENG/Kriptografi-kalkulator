@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}History - Kriptografi Klasik{% endblock %}
+
+{% block content %}
+  <h1 class="h3">History</h1>
+  <p class="text-muted">Riwayat enkripsi dan dekripsi akan ditampilkan di sini.</p>
+  <div class="mt-3">
+    {% if history %}
+      <ul class="list-group">
+        {% for h in history|reverse %}
+          <li class="list-group-item">
+            <strong>{{ h.algorithm }}</strong> - {{ h.mode }} - <em>{{ h.text }}</em>
+            <div class="mt-1">Result: <code>{{ h.result }}</code></div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted">Tidak ada riwayat.</p>
+    {% endif %}
+  </div>
+{% endblock %}

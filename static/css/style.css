@@ -1,0 +1,20 @@
+:root{
+  --bg: #f8f9fa;
+  --text: #212529;
+  --card: #ffffff;
+}
+body.dark{
+  --bg: #121212;
+  --text: #e9ecef;
+  --card: #1f1f1f;
+}
+body{
+  background: var(--bg);
+  color: var(--text);
+}
+.card{background:var(--card)}
+#steps li{transition:all 220ms ease}
+#result{white-space:pre-wrap}
+@media (max-width:768px){
+  #result{font-size:14px}
+}
