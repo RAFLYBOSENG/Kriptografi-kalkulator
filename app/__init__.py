@@ -15,3 +15,9 @@ def create_app() -> Flask:
     app.register_blueprint(api_bp, url_prefix='/api')
 
     return app
+
+
+# Expose a module-level WSGI application named `app` so servers like gunicorn
+# can import `app` directly (e.g. `gunicorn app:app`). This keeps the
+# factory function for testing while providing a simple entrypoint for WSGI.
+app = create_app()
