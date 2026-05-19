@@ -8,20 +8,576 @@
   <meta name="description" content="Classical cipher toolkit supporting Caesar, Vigenere, Affine, Hill, and Playfair ciphers." />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <style>
-    /* Minimal layout guard when project CSS not present */
-    body { font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial; margin:0; padding:0; }
-    .site-nav{background:#0b2545;color:#fff;padding:.5rem 1rem;position:sticky;top:0;z-index:40}
-    .nav-inner{display:flex;align-items:center;gap:1rem}
-    .nav-links{display:flex;list-style:none;margin:0;padding:0;gap:.5rem}
-    .nav-link{color:#cfe3ff;text-decoration:none}
-    main{padding:1rem;max-width:1100px;margin:0 auto}
-    .cipher-grid{display:flex;gap:1rem}
-    .cipher-card{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex:1}
-    .output-stack{width:360px}
-    .result-box{background:#f6f9ff;padding:.75rem;border-radius:6px;margin-bottom:1rem}
-    .process-box{background:#fff;padding:.75rem;border-radius:6px;border:1px dashed #e6eef8;min-height:120px}
-    .matrix-visual{display:grid;gap:4px}
-    .matrix-visual span{display:inline-grid;place-items:center;padding:.5rem;border:1px solid #ddd}
+    :root {
+      --space-0: #040814;
+      --space-1: #0a1230;
+      --space-2: #13275c;
+      --nebula: #2ae3b7;
+      --starlight: #9fc9ff;
+      --ink: #e6f0ff;
+      --muted: #b5c7e6;
+      --line: rgba(169, 198, 255, 0.24);
+      --card: rgba(10, 19, 48, 0.7);
+      --btn-primary: linear-gradient(120deg, #4ce8c1, #83b6ff);
+      --text-muted: #b5c7e6;
+    }
+
+    [data-theme="light"] {
+      --space-0: #f5f7fa;
+      --space-1: #e9ecf2;
+      --space-2: #d9e3ed;
+      --nebula: #0d9f7f;
+      --starlight: #2563a8;
+      --ink: #1a2847;
+      --muted: #475569;
+      --line: rgba(51, 114, 198, 0.14);
+      --card: rgba(226, 232, 240, 0.75);
+      --btn-primary: linear-gradient(120deg, #0d9f7f, #2563a8);
+      --text-muted: #475569;
+    }
+
+    body {
+      font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at 16% 12%, rgba(42, 227, 183, 0.22), transparent 40%),
+        radial-gradient(circle at 84% 22%, rgba(159, 201, 255, 0.24), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(47, 91, 183, 0.3), transparent 58%),
+        linear-gradient(150deg, var(--space-0) 0%, var(--space-1) 58%, var(--space-2) 100%);
+      color: var(--ink);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      background-image:
+        radial-gradient(1.6px 1.6px at 5% 12%, rgba(255,255,255,0.95), transparent),
+        radial-gradient(1px 1px at 12% 34%, rgba(255,255,255,0.85), transparent),
+        radial-gradient(2px 2px at 18% 30%, rgba(255,255,255,0.98), transparent),
+        radial-gradient(1px 1px at 24% 8%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1.2px 1.2px at 32% 14%, rgba(255,255,255,0.75), transparent),
+        radial-gradient(1px 1px at 38% 48%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.4px 1.4px at 48% 62%, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 56% 28%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 63% 42%, rgba(255,255,255,0.78), transparent),
+        radial-gradient(1px 1px at 71% 16%, rgba(255,255,255,0.76), transparent),
+        radial-gradient(1px 1px at 84% 22%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90% 72%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 9% 82%, rgba(255,255,255,0.8), transparent);
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      /* initial positions (y offsets will be animated in `fall`) */
+      background-position: 5% 12%, 12% 34%, 18% 30%, 24% 8%, 32% 14%, 38% 48%, 48% 62%, 56% 28%, 63% 42%, 71% 16%, 84% 22%, 90% 72%, 9% 82%;
+      opacity: 0.6;
+      /* twinkle + gentle falling; reduced fall duration for slightly faster descent */
+      animation: twinkle 5.5s ease-in-out infinite, fall 14s linear infinite;
+    }
+
+    body::after {
+      background: radial-gradient(circle at 50% 50%, rgba(42, 227, 183, 0.12), transparent 45%);
+      animation: drift 14s linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.75; }
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Gentle falling motion for stars (animates background-position downwards) */
+    @keyframes fall {
+      0% {
+        background-position: 5% 12%, 12% 34%, 18% 30%, 24% 8%, 32% 14%, 38% 48%, 48% 62%, 56% 28%, 63% 42%, 71% 16%, 84% 22%, 90% 72%, 9% 82%;
+        opacity: 0.7;
+      }
+      70% {
+        opacity: 0.55;
+      }
+      100% {
+        background-position: 5% 160%, 12% 184%, 18% 150%, 24% 128%, 32% 144%, 38% 182%, 48% 196%, 56% 148%, 63% 162%, 71% 130%, 84% 158%, 90% 192%, 9% 202%;
+        opacity: 0.45;
+      }
+    }
+
+    [data-theme="light"] body {
+      background:
+        radial-gradient(circle at 16% 12%, rgba(13, 159, 127, 0.08), transparent 40%),
+        radial-gradient(circle at 84% 22%, rgba(37, 99, 168, 0.09), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(37, 99, 168, 0.12), transparent 58%),
+        linear-gradient(150deg, #f5f7fa 0%, #e9ecf2 58%, #e0e7f1 100%);
+    }
+
+    .site-nav {
+      background: rgba(4, 8, 20, 0.7);
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      padding: .5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-inner { display: flex; align-items: center; gap: 1rem }
+    .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: .5rem }
+    .nav-link { color: var(--ink); text-decoration: none }
+    .theme-toggle { background: rgba(159, 201, 255, 0.16); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.7rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .theme-toggle:hover { background: rgba(159, 201, 255, 0.28); }
+
+    main { padding: 1rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1 }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-inner { gap: 0.5rem }
+      .nav-links { gap: 0.3rem }
+      .nav-link { font-size: 0.85rem }
+      main { padding: 0.75rem; }
+
+      .hero {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 14px;
+      }
+
+      .hero-copy h1 { font-size: 1.5rem; }
+      .hero-copy p { max-width: 100%; }
+
+      .hero-panel {
+        min-width: 100%;
+        flex-shrink: 1;
+      }
+
+      .metric-value { font-size: 1.5rem; }
+      .cipher-grid { flex-direction: column; gap: 1rem; }
+      .output-stack { width: 100%; }
+
+      .history-panel { padding: 0.75rem; margin-bottom: 1rem; }
+      .history-panel h2 { font-size: 1rem; }
+
+      .cipher-card { padding: 0.75rem; }
+      .btn-run, .btn-secondary { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
+      .btn-copy { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+
+      textarea, input[type="text"], input[type="number"] { padding: 0.5rem; font-size: 0.95rem; }
+      .form-label { font-size: 0.85rem; }
+
+      .segmented { gap: 0.2rem; }
+      .segment { padding: 0.4rem; font-size: 0.8rem; }
+
+      .section-code { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+      .section-head { gap: 0.75rem; }
+      .section-head > div h2 { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .site-nav { padding: 0.4rem 0.5rem; }
+      .nav-inner { gap: 0.3rem; flex-wrap: wrap; }
+      .nav-links { gap: 0.2rem; font-size: 0.75rem; }
+      .theme-toggle { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+      main { padding: 0.5rem; }
+
+      .hero {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+      }
+
+      .hero-copy h1 { font-size: 1.25rem; }
+      .hero-copy p { font-size: 0.9rem; }
+      .hero-copy > div { font-size: 0.8rem; }
+
+      .metric-value { font-size: 1.2rem; }
+      .metric-label { font-size: 0.7rem; }
+
+      .history-panel { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .history-panel h2 { font-size: 0.9rem; margin: 0.3rem 0 0.5rem; }
+      .history-list .history-item { padding: 0.5rem; font-size: 0.8rem; }
+
+      .cipher-section { padding-top: 1rem; margin-bottom: 1.5rem; }
+      .cipher-grid { gap: 0.75rem; }
+      .cipher-card { padding: 0.6rem; border-radius: 10px; }
+
+      .form-label { font-size: 0.75rem; margin-bottom: 0.25rem; }
+      textarea, input[type="text"], input[type="number"] {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+      }
+
+      .btn-run, .btn-secondary {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+
+      .result-box { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .result-label { font-size: 0.7rem; }
+      .process-box { padding: 0.5rem; min-height: 100px; font-size: 0.8rem; }
+
+      .segmented { gap: 0.15rem; padding: 0.2rem; }
+      .segment { padding: 0.3rem; font-size: 0.7rem; }
+
+      .section-code { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
+      .section-head { gap: 0.5rem; }
+      .section-head > div h2 { font-size: 1rem; }
+      .section-kicker { font-size: 0.7rem; }
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-inner { gap: 0.5rem }
+      .nav-links { gap: 0.3rem }
+      .nav-link { font-size: 0.85rem }
+      main { padding: 0.75rem; }
+
+      .hero {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 14px;
+      }
+
+      .hero-copy h1 { font-size: 1.5rem; }
+      .hero-copy p { max-width: 100%; }
+
+      .hero-panel {
+        min-width: 100%;
+        flex-shrink: 1;
+      }
+
+      .metric-value { font-size: 1.5rem; }
+      .cipher-grid { flex-direction: column; gap: 1rem; }
+      .output-stack { width: 100%; }
+
+      .history-panel { padding: 0.75rem; margin-bottom: 1rem; }
+      .history-panel h2 { font-size: 1rem; }
+
+      .cipher-card { padding: 0.75rem; }
+      .btn-run, .btn-secondary { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
+      .btn-copy { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+
+      textarea, input[type="text"], input[type="number"] { padding: 0.5rem; font-size: 0.95rem; }
+      .form-label { font-size: 0.85rem; }
+
+      .segmented { gap: 0.2rem; }
+      .segment { padding: 0.4rem; font-size: 0.8rem; }
+
+      .section-code { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+      .section-head { gap: 0.75rem; }
+      .section-head > div h2 { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .site-nav { padding: 0.4rem 0.5rem; }
+      .nav-inner { gap: 0.3rem; flex-wrap: wrap; }
+      .nav-links { gap: 0.2rem; font-size: 0.75rem; }
+      .theme-toggle { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+      main { padding: 0.5rem; }
+
+      .hero {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+      }
+
+      .hero-copy h1 { font-size: 1.25rem; }
+      .hero-copy p { font-size: 0.9rem; }
+      .hero-copy > div { font-size: 0.8rem; }
+
+      .metric-value { font-size: 1.2rem; }
+      .metric-label { font-size: 0.7rem; }
+
+      .history-panel { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .history-panel h2 { font-size: 0.9rem; margin: 0.3rem 0 0.5rem; }
+      .history-list .history-item { padding: 0.5rem; font-size: 0.8rem; }
+
+      .cipher-section { padding-top: 1rem; margin-bottom: 1.5rem; }
+      .cipher-grid { gap: 0.75rem; }
+      .cipher-card { padding: 0.6rem; border-radius: 10px; }
+
+      .form-label { font-size: 0.75rem; margin-bottom: 0.25rem; }
+      textarea, input[type="text"], input[type="number"] {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+      }
+
+      .btn-run, .btn-secondary {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+
+      .result-box { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .result-label { font-size: 0.7rem; }
+      .process-box { padding: 0.5rem; min-height: 100px; font-size: 0.8rem; }
+
+      .segmented { gap: 0.15rem; padding: 0.2rem; }
+      .segment { padding: 0.3rem; font-size: 0.7rem; }
+
+      .section-code { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
+      .section-head { gap: 0.5rem; }
+      .section-head > div h2 { font-size: 1rem; }
+      .section-kicker { font-size: 0.7rem; }
+    }
+
+    .hero {
+      background: linear-gradient(140deg, rgba(4, 8, 20, 0.84), rgba(26, 51, 108, 0.6));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 15px 34px rgba(2, 5, 15, 0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .hero-copy h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: var(--ink);
+      text-shadow: 0 0 14px rgba(159, 201, 255, 0.34);
+    }
+
+    .hero-copy .eyebrow {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--nebula);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .hero-copy p { color: var(--muted); margin: 0.5rem 0 0; max-width: 600px; line-height: 1.5; }
+
+    .hero-panel {
+      background: rgba(6, 14, 36, 0.68);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.2rem;
+      min-width: 240px;
+      flex-shrink: 0;
+    }
+
+    .hero-panel > div {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-panel > div:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .metric-value { display: block; font-size: 1.8rem; font-weight: 700; color: var(--starlight); }
+    .metric-label { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .history-panel {
+      background: rgba(6, 14, 36, 0.68);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .history-panel h2 { margin: 0.5rem 0 1rem; color: var(--ink); font-size: 1.2rem; }
+    .history-panel .panel-kicker { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; letter-spacing: 0.05em; margin: 0; }
+
+    .history-list { color: var(--muted) }
+    .history-list.empty { text-align: center; padding: 1rem; }
+    .history-list .history-item {
+      background: rgba(10, 19, 48, 0.5);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .history-item strong { color: var(--starlight) }
+    .history-item code { background: rgba(159, 201, 255, 0.08); padding: 0.2rem 0.4rem; border-radius: 4px; color: var(--nebula) }
+
+    .cipher-grid { display: flex; gap: 1rem }
+    .cipher-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(3, 7, 20, 0.35);
+      flex: 1;
+      backdrop-filter: blur(3px);
+    }
+
+    .output-stack { width: 360px }
+
+    .result-box {
+      background: rgba(159, 201, 255, 0.08);
+      padding: .75rem;
+      border-radius: 9px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--line);
+    }
+
+    .result-label { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .result-text { word-break: break-all; color: var(--ink); font-weight: 600; }
+
+    .process-box {
+      background: rgba(6, 14, 36, 0.68);
+      padding: .75rem;
+      border-radius: 9px;
+      border: 1px dashed var(--line);
+      min-height: 120px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .matrix-visual { display: grid; gap: 4px }
+    .matrix-visual span {
+      display: inline-grid;
+      place-items: center;
+      padding: .5rem;
+      border: 1px solid var(--line);
+      background: rgba(159, 201, 255, 0.08);
+      border-radius: 6px;
+      color: var(--ink);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .form-label span { color: var(--nebula) }
+
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(159, 201, 255, 0.08);
+      color: var(--ink);
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: var(--nebula);
+      box-shadow: 0 0 12px rgba(42, 227, 183, 0.2);
+    }
+
+    .btn-run, .btn-secondary {
+      background: var(--btn-primary);
+      color: #051024;
+      border: 0;
+      padding: 0.65rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(42, 227, 183, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-run:hover, .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(42, 227, 183, 0.48);
+    }
+
+    .btn-copy {
+      background: rgba(159, 201, 255, 0.16);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-copy:hover { background: rgba(159, 201, 255, 0.28) }
+
+    .segmented {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(6, 14, 36, 0.68);
+      padding: 0.3rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .segment {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .segment.active {
+      background: rgba(42, 227, 183, 0.12);
+      color: var(--nebula);
+      border-color: rgba(42, 227, 183, 0.45);
+    }
+
+    .section-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      background: linear-gradient(135deg, rgba(42, 227, 183, 0.16), rgba(159, 201, 255, 0.16));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--nebula);
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .error-region { color: #ff6b6b; font-size: 0.9rem; margin-top: 0.5rem; }
+    .help-text { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+    .cipher-section {
+      border-top: 1px solid var(--line);
+      padding-top: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-head {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-head > div h2 { margin: 0.3rem 0 0; color: var(--ink); font-size: 1.4rem; }
+    .section-kicker { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; margin: 0; letter-spacing: 0.05em; }
+    .section-head > div p { margin: 0.3rem 0; color: var(--muted); font-size: 0.9rem; }
   </style>
 </head>
 
@@ -51,6 +607,11 @@
         <p>
           Encrypt, decrypt, and inspect every step behind Caesar, Vigenere, Affine, Hill, and Playfair ciphers.
         </p>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(169, 198, 255, 0.24);">
+          <p style="font-size: 0.9rem; margin: 0.5rem 0; color: var(--muted);">
+            <strong style="color: var(--nebula);">Panduan cepat:</strong> Pilih algoritma di bawah, masukkan teks dan kunci, lalu tekan tombol Encrypt/Decrypt untuk melihat hasil dan langkah-langkah transformasi.
+          </p>
+        </div>
       </div>
       <aside class="hero-panel" aria-label="Workbench summary">
         <div>
@@ -898,10 +1459,20 @@
     }
 
     document.getElementById('theme-toggle').addEventListener('click', () => {
-      setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      const currentTheme = document.documentElement.dataset.theme || 'light';
+      setTheme(currentTheme === 'dark' ? 'light' : 'dark');
     });
 
+    // Apply saved theme on page load
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+    setTheme(savedTheme);
+
     document.getElementById('playfair-key').addEventListener('input', e => renderPlayfairPreview(e.target.value.trim()));
+
+    // Mobile viewport optimization
+    if (window.innerWidth <= 768) {
+      document.querySelector('main').style.zIndex = '1';
+    }
 
     [
       ['caesar-shift', runCaesar],
@@ -940,7 +1511,7 @@
       document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 8);
     }, { passive: true });
 
-    setTheme(localStorage.getItem(THEME_KEY) || 'light');
+
     renderHistory();
   </script>
 </body>

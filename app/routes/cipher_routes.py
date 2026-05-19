@@ -52,10 +52,10 @@ def process():
 				out = playfair.decrypt(text, key)
 		else:
 			flash('Unknown algorithm', 'danger')
-			return redirect(url_for('main.index'))
+			return redirect(url_for('main.kalkulator'))
 	except Exception as e:
 		flash(str(e), 'danger')
-		return redirect(url_for('main.index'))
+		return redirect(url_for('main.kalkulator'))
 
 	# save to history
 	entry = {
