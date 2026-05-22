@@ -1,4 +1,7 @@
 from flask import Blueprint, request, jsonify
+from ..services import history_service
+from ..algorithms import hill as hill_alg
+from ..algorithms import caesar as caesar_alg, vigenere as vigenere_alg, affine as affine_alg, playfair as playfair_alg
 
 api_bp = Blueprint('api', __name__)
 
@@ -313,13 +316,24 @@ def caesar_route():
     text = data.get('text', '')
     mode = data.get('mode', 'encrypt')
     try:
-        shift = int(data.get('shift', 0)) % 26
+        shift_raw = data.get('shift', None)
+        if shift_raw is None:
+            return jsonify({'error': 'Shift required (1-25).'}), 400
+        shift = int(shift_raw)
     except (ValueError, TypeError):
         return jsonify({'error': 'Shift must be an integer'}), 400
+    if not (1 <= shift <= 25):
+        return jsonify({'error': 'Shift must be between 1 and 25'}), 400
     if not text:
         return jsonify({'error': 'Please provide text.'}), 400
-    result = caesar_encrypt(text, shift) if mode == 'encrypt' else caesar_decrypt(text, shift)
-    return jsonify({'result': result, 'mode': mode})
+    out = caesar_alg.encrypt(text, shift) if mode == 'encrypt' else caesar_alg.decrypt(text, shift)
+    # out is a dict with result and steps
+    payload = {'mode': mode}
+    if isinstance(out, dict):
+        payload.update(out)
+    else:
+        payload['result'] = out
+    return jsonify(payload)
 
 
 @api_bp.route('/vigenere', methods=['POST'])
@@ -332,8 +346,13 @@ def vigenere_route():
         return jsonify({'error': 'Please provide text.'}), 400
     if not key or not key.isalpha():
         return jsonify({'error': 'Keyword required (letters only).'}), 400
-    result = vigenere_encrypt(text, key) if mode == 'encrypt' else vigenere_decrypt(text, key)
-    return jsonify({'result': result, 'mode': mode})
+    out = vigenere_alg.encrypt(text, key) if mode == 'encrypt' else vigenere_alg.decrypt(text, key)
+    payload = {'mode': mode}
+    if isinstance(out, dict):
+        payload.update(out)
+    else:
+        payload['result'] = out
+    return jsonify(payload)
 
 
 @api_bp.route('/affine', methods=['POST'])
@@ -350,8 +369,13 @@ def affine_route():
         return jsonify({'error': 'Please provide text.'}), 400
     if a not in AFFINE_VALID_A:
         return jsonify({'error': f'Key a must be coprime with 26. Valid values: {AFFINE_VALID_A}'}), 400
-    result = affine_encrypt(text, a, b % 26) if mode == 'encrypt' else affine_decrypt(text, a, b % 26)
-    return jsonify({'result': result, 'mode': mode})
+    out = affine_alg.encrypt(text, a, b % 26) if mode == 'encrypt' else affine_alg.decrypt(text, a, b % 26)
+    payload = {'mode': mode}
+    if isinstance(out, dict):
+        payload.update(out)
+    else:
+        payload['result'] = out
+    return jsonify(payload)
 
 
 @api_bp.route('/hill', methods=['POST'])
@@ -381,13 +405,35 @@ def hill_route():
     else:  # size == 6
         det = _det6(key_matrix) % 26
     
-    if _gcd(det, 26) != 1:
-        return jsonify({'error': f'Matrix determinant ({det}) must be coprime with 26.'}), 400
     letters_only = [c for c in text.upper() if c.isalpha()]
     if not letters_only:
         return jsonify({'error': 'Input must contain at least one letter.'}), 400
-    result = hill_encrypt(text, key_matrix) if mode == 'encrypt' else hill_decrypt(text, key_matrix)
-    return jsonify({'result': result, 'mode': mode, 'size': size})
+
+    # Use algorithm implementation in app.algorithms.hill which returns detailed info
+    try:
+        if mode == 'encrypt':
+            out = hill_alg.encrypt(text, key_matrix)
+        else:
+            out = hill_alg.decrypt(text, key_matrix)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+    # out is expected to be a dict with keys: result, steps, matrix, determinant, det_mod26, invertible, inverse
+    if isinstance(out, dict):
+        payload = {
+            'result': out.get('result'),
+            'mode': mode,
+            'size': size,
+            'steps': out.get('steps', []),
+            'matrix': out.get('matrix'),
+            'determinant': out.get('determinant'),
+            'det_mod26': out.get('det_mod26'),
+            'invertible': out.get('invertible'),
+            'inverse': out.get('inverse')
+        }
+    else:
+        payload = {'result': str(out), 'mode': mode, 'size': size}
+    return jsonify(payload)
 
 
 @api_bp.route('/playfair', methods=['POST'])
@@ -403,5 +449,50 @@ def playfair_route():
     letters_only = [c for c in text.upper() if c.isalpha()]
     if not letters_only:
         return jsonify({'error': 'Input must contain at least one letter.'}), 400
-    result = playfair_encrypt(text, key) if mode == 'encrypt' else playfair_decrypt(text, key)
-    return jsonify({'result': result, 'mode': mode})
+    out = playfair_alg.encrypt(text, key) if mode == 'encrypt' else playfair_alg.decrypt(text, key)
+    payload = {'mode': mode}
+    if isinstance(out, dict):
+        payload.update(out)
+    else:
+        payload['result'] = out
+    return jsonify(payload)
+
+
+# ─────────────────────────────────────────────
+#  HISTORY (server-side)
+# ─────────────────────────────────────────────
+
+
+@api_bp.route('/history', methods=['GET'])
+def history_get():
+    try:
+        data = history_service.load_history()
+        return jsonify({'history': data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api_bp.route('/history', methods=['POST'])
+def history_post():
+    try:
+        data = request.get_json() or {}
+        # normalize expected keys
+        entry = {
+            'algorithm': data.get('algorithm') or data.get('cipher') or data.get('cipher_name'),
+            'mode': data.get('mode'),
+            'text': data.get('text') or data.get('input') or data.get('plain') ,
+            'result': data.get('result') or data.get('output') or data.get('ciphertext')
+        }
+        history_service.save_history(entry)
+        return jsonify({'ok': True, 'entry': entry})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@api_bp.route('/history', methods=['DELETE'])
+def history_delete():
+    try:
+        history_service.clear_history()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

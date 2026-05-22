@@ -10,7 +10,8 @@
       <ul class="list-group">
         {% for h in history|reverse %}
           <li class="list-group-item">
-            <strong>{{ h.algorithm }}</strong> - {{ h.mode }} - <em>{{ h.text }}</em>
+            <div><strong>{{ h.algorithm }}</strong> - {{ h.mode }} <small class="text-muted">{{ h.time }}</small></div>
+            <div><em>{{ h.text }}</em></div>
             <div class="mt-1">Result: <code>{{ h.result }}</code></div>
           </li>
         {% endfor %}

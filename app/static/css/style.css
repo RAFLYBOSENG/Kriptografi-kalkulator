@@ -6,6 +6,9 @@
   box-sizing: border-box;
 }
 
+/* Step player visuals */
+}
+
 :root {
   color-scheme: light;
   --bg: #eef2f6;
@@ -689,6 +692,14 @@ input[type="number"] {
 
 .muted-step {
   color: var(--muted);
+}
+
+.step-list{counter-reset:step;}
+.step-list li{padding:6px 10px;margin:4px 0;border-radius:4px;}
+.step-list li.step-active{background:#fff7e6;border-left:4px solid #ffb74d;}
+.step-player{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.step-player button{padding:6px 8px;border-radius:4px;border:1px solid rgba(0,0,0,0.08);background:#fff;cursor:pointer;}
+.step-player .speed{width:60px;}
 }
 
 .matrix-inputs {
