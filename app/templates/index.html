@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CipherLab - Classical Cipher Workbench</title>
-  <meta name="description" content="Classical cipher toolkit supporting Caesar, Vigenere, Affine, Hill, and Playfair ciphers." />
+  <title>CipherLab - Belajar Kriptografi Klasik</title>
+  <meta name="description" content="Aplikasi interaktif untuk mempelajari cara kerja Caesar, Vigenere, Affine, Hill, dan Playfair cipher langkah demi langkah." />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <style>
     :root {
@@ -457,6 +457,29 @@
       color: var(--ink);
     }
 
+    /* Matrix input grid for Hill cipher key entry */
+    .matrix-inputs {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 2), 1fr);
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .matrix-inputs input {
+      width: 100%;
+      padding: 0.45rem;
+      text-align: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(159, 201, 255, 0.04);
+      color: var(--ink);
+      box-sizing: border-box;
+    }
+
+    .matrix-2 { --cols: 2 }
+    .matrix-3 { --cols: 3 }
+    .matrix-6 { --cols: 6 }
+
     .form-group {
       margin-bottom: 1rem;
     }
@@ -602,42 +625,63 @@
   <main class="page-shell" id="top">
     <header class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">Classical Cryptography Workbench</div>
+        <div class="eyebrow">Laboratorium belajar kriptografi klasik</div>
         <h1>CipherLab</h1>
         <p>
-          Encrypt, decrypt, and inspect every step behind Caesar, Vigenere, Affine, Hill, and Playfair ciphers.
+          Gunakan halaman ini untuk memahami bagaimana teks berubah menjadi cipher, lalu ikuti langkah demi langkah supaya rumus, kunci, dan hasilnya menjadi jelas.
         </p>
         <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(169, 198, 255, 0.24);">
           <p style="font-size: 0.9rem; margin: 0.5rem 0; color: var(--muted);">
-            <strong style="color: var(--nebula);">Panduan cepat:</strong> Pilih algoritma di bawah, masukkan teks dan kunci, lalu tekan tombol Encrypt/Decrypt untuk melihat hasil dan langkah-langkah transformasi.
+            <strong style="color: var(--nebula);">Panduan cepat belajar:</strong> Pilih algoritma di bawah, masukkan teks dan kunci, lalu tekan Encrypt/Decrypt untuk melihat hasil, langkah transformasi, dan pola matematikanya.
           </p>
         </div>
       </div>
       <aside class="hero-panel" aria-label="Workbench summary">
         <div>
           <span class="metric-value">5</span>
-          <span class="metric-label">cipher modules</span>
+          <span class="metric-label">algoritma yang dipelajari</span>
         </div>
         <div>
           <span class="metric-value">26</span>
-          <span class="metric-label">alphabet modulus</span>
+          <span class="metric-label">modulus alfabet</span>
         </div>
         <div>
           <span class="metric-value">A=0</span>
-          <span class="metric-label">calculation model</span>
+          <span class="metric-label">model perhitungan</span>
         </div>
       </aside>
     </header>
 
+    <section class="history-panel" aria-labelledby="learning-title">
+      <div>
+        <p class="panel-kicker">Fokus belajar</p>
+        <h2 id="learning-title">Apa yang perlu diperhatikan</h2>
+      </div>
+      <div class="history-list">
+        <article class="history-item">
+          <strong>Caesar dan Vigenere</strong>
+          <p>Perhatikan pergeseran huruf dan lihat bagaimana satu kunci dipakai berulang untuk mengubah alfabet.</p>
+        </article>
+        <article class="history-item">
+          <strong>Affine dan Hill</strong>
+          <p>Amati hubungan rumus modular, determinan, dan invers matriks untuk memahami mengapa kunci tertentu valid atau tidak.</p>
+        </article>
+        <article class="history-item">
+          <strong>Playfair</strong>
+          <p>Lihat pasangan huruf, tabel 5x5, dan aturan baris-kolom-persegi agar proses digraf mudah diikuti.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="history-panel" aria-labelledby="history-title">
       <div>
-        <p class="panel-kicker">Session history</p>
-        <h2 id="history-title">Recent operations</h2>
+        <p class="panel-kicker">Jejak latihan</p>
+        <h2 id="history-title">Operasi terbaru</h2>
       </div>
       <div class="history-actions">
-        <button class="btn-secondary" type="button" onclick="clearHistory()">Clear history</button>
+        <button class="btn-secondary" type="button" onclick="clearHistory()">Hapus jejak</button>
       </div>
-      <div class="history-list empty" id="history-list">No encryption or decryption history yet.</div>
+      <div class="history-list empty" id="history-list">Belum ada latihan enkripsi atau dekripsi.</div>
     </section>
 
     <section class="cipher-section" id="caesar-section" data-cipher="caesar">
@@ -646,39 +690,39 @@
         <div>
           <p class="section-kicker">Monoalphabetic shift</p>
           <h2>Caesar Cipher</h2>
-          <p>Formula: E(x) = (x + k) mod 26, D(y) = (y - k) mod 26</p>
+          <p>Konsep inti: geser setiap huruf sebesar k langkah pada alfabet.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="caesar-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('caesar', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('caesar', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="caesar-text">Input Text <span>*</span></label>
-            <textarea id="caesar-text" placeholder="Type or paste your message here"></textarea>
+            <label class="form-label" for="caesar-text">Teks masukan <span>*</span></label>
+            <textarea id="caesar-text" placeholder="Ketik pesan yang ingin dipelajari"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="caesar-shift">Shift Value <span>*</span></label>
+            <label class="form-label" for="caesar-shift">Nilai geser <span>*</span></label>
             <input type="number" id="caesar-shift" placeholder="3" min="1" max="25" />
           </div>
-          <button class="btn-run" id="caesar-run" type="button" onclick="runCaesar()">Encrypt</button>
+          <button class="btn-run" id="caesar-run" type="button" onclick="runCaesar()">Pelajari</button>
           <div class="error-region" id="caesar-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="caesar-result-box">
-            <div class="result-label" id="caesar-result-label">Encrypted Output</div>
+            <div class="result-label" id="caesar-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="caesar-result-text"></div>
             <button class="btn-copy" id="caesar-copy-btn" type="button" onclick="copyResult('caesar')">Copy</button>
           </div>
           <div class="process-box" id="caesar-process">
-            <div class="empty-state">Run Caesar to see the shift formula and character-by-character steps.</div>
+            <div class="empty-state">Jalankan Caesar untuk melihat rumus geser dan langkah tiap karakter.</div>
           </div>
         </div>
       </div>
@@ -690,39 +734,39 @@
         <div>
           <p class="section-kicker">Polyalphabetic keyword</p>
           <h2>Vigenere Cipher</h2>
-          <p>Formula: E(x) = (x + k_i) mod 26, D(y) = (y - k_i) mod 26</p>
+          <p>Konsep inti: kunci kata diulang untuk menggeser huruf satu per satu.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="vigenere-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('vigenere', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('vigenere', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="vigenere-text">Input Text <span>*</span></label>
+            <label class="form-label" for="vigenere-text">Teks masukan <span>*</span></label>
             <textarea id="vigenere-text" placeholder="Attack at dawn"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="vigenere-key">Keyword <span>*</span></label>
+            <label class="form-label" for="vigenere-key">Kata kunci <span>*</span></label>
             <input type="text" id="vigenere-key" placeholder="SECRET" autocomplete="off" />
           </div>
-          <button class="btn-run" id="vigenere-run" type="button" onclick="runVigenere()">Encrypt</button>
+          <button class="btn-run" id="vigenere-run" type="button" onclick="runVigenere()">Pelajari</button>
           <div class="error-region" id="vigenere-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="vigenere-result-box">
-            <div class="result-label" id="vigenere-result-label">Encrypted Output</div>
+            <div class="result-label" id="vigenere-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="vigenere-result-text"></div>
             <button class="btn-copy" id="vigenere-copy-btn" type="button" onclick="copyResult('vigenere')">Copy</button>
           </div>
           <div class="process-box" id="vigenere-process">
-            <div class="empty-state">Run Vigenere to see keyword shifts aligned with each letter.</div>
+            <div class="empty-state">Jalankan Vigenere untuk melihat kata kunci dan pergeseran yang sejajar dengan tiap huruf.</div>
           </div>
         </div>
       </div>
@@ -734,46 +778,46 @@
         <div>
           <p class="section-kicker">Linear substitution</p>
           <h2>Affine Cipher</h2>
-          <p>Formula: E(x) = (ax + b) mod 26, D(y) = a^-1(y - b) mod 26</p>
+          <p>Konsep inti: kombinasi perkalian dan penjumlahan modular, lalu dibalik dengan invers a.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="affine-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('affine', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('affine', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="affine-text">Input Text <span>*</span></label>
+            <label class="form-label" for="affine-text">Teks masukan <span>*</span></label>
             <textarea id="affine-text" placeholder="Affine cipher"></textarea>
           </div>
           <div class="field-row">
             <div class="form-group">
-              <label class="form-label" for="affine-a">Key a <span>*</span></label>
+              <label class="form-label" for="affine-a">Kunci a <span>*</span></label>
               <input type="number" id="affine-a" placeholder="5" min="1" max="25" />
             </div>
             <div class="form-group">
-              <label class="form-label" for="affine-b">Key b <span>*</span></label>
+              <label class="form-label" for="affine-b">Kunci b <span>*</span></label>
               <input type="number" id="affine-b" placeholder="8" min="0" max="25" />
             </div>
           </div>
-          <p class="help-text">Valid a values: 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25</p>
-          <button class="btn-run" id="affine-run" type="button" onclick="runAffine()">Encrypt</button>
+          <p class="help-text">Nilai a yang valid adalah yang coprime terhadap 26.</p>
+          <button class="btn-run" id="affine-run" type="button" onclick="runAffine()">Pelajari</button>
           <div class="error-region" id="affine-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="affine-result-box">
-            <div class="result-label" id="affine-result-label">Encrypted Output</div>
+            <div class="result-label" id="affine-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="affine-result-text"></div>
             <button class="btn-copy" id="affine-copy-btn" type="button" onclick="copyResult('affine')">Copy</button>
           </div>
           <div class="process-box" id="affine-process">
-            <div class="empty-state">Run Affine to see modular arithmetic for each transformed letter.</div>
+            <div class="empty-state">Jalankan Affine untuk melihat aritmetika modular pada tiap huruf yang berubah.</div>
           </div>
         </div>
       </div>
@@ -785,7 +829,7 @@
         <div>
           <p class="section-kicker">Matrix polygraphic cipher</p>
           <h2>Hill Cipher</h2>
-          <p id="hill-subtitle">Formula: C = K x P mod 26 for a 2x2 key matrix</p>
+          <p id="hill-subtitle">Konsep inti: vektor huruf dikalikan matriks kunci lalu diambil modulo 26.</p>
         </div>
       </div>
 
@@ -793,14 +837,14 @@
         <div class="cipher-card">
           <div class="field-row">
             <div class="form-group">
-              <label class="form-label">Mode</label>
+              <label class="form-label">Mode belajar</label>
               <div class="segmented" id="hill-toggle">
                 <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('hill', 'encrypt', this)">Encrypt</button>
                 <button class="segment" type="button" data-mode="decrypt" onclick="setMode('hill', 'decrypt', this)">Decrypt</button>
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Matrix Size</label>
+              <label class="form-label">Ukuran matriks</label>
               <div class="segmented" id="hill-size-toggle">
                 <button class="segment active" id="hill-size-2" type="button" onclick="setHillSize(2, this)">2x2</button>
                 <button class="segment" id="hill-size-3" type="button" onclick="setHillSize(3, this)">3x3</button>
@@ -809,12 +853,12 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="hill-text">Input Text <span>*</span></label>
+            <label class="form-label" for="hill-text">Teks masukan <span>*</span></label>
             <textarea id="hill-text" placeholder="Letters are grouped and padded with X when needed"></textarea>
           </div>
 
           <div class="form-group" id="hill-matrix-2x2">
-            <label class="form-label">Key Matrix 2x2 <span>*</span></label>
+            <label class="form-label">Matriks kunci 2x2 <span>*</span></label>
             <div class="matrix-inputs matrix-2">
               <input type="number" id="hill-m00" placeholder="3" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-m01" placeholder="3" min="0" max="25" aria-label="row 1 column 2" />
@@ -825,7 +869,7 @@
           </div>
 
           <div class="form-group" id="hill-matrix-3x3" hidden>
-            <label class="form-label">Key Matrix 3x3 <span>*</span></label>
+            <label class="form-label">Matriks kunci 3x3 <span>*</span></label>
             <div class="matrix-inputs matrix-3">
               <input type="number" id="hill-n00" placeholder="6" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-n01" placeholder="24" min="0" max="25" aria-label="row 1 column 2" />
@@ -841,7 +885,7 @@
           </div>
 
           <div class="form-group" id="hill-matrix-6x6" hidden>
-            <label class="form-label">Key Matrix 6x6 <span>*</span></label>
+            <label class="form-label">Matriks kunci 6x6 <span>*</span></label>
             <div class="matrix-inputs matrix-6" style="--cols: 6;">
               <input type="number" id="hill-p00" value="1" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-p01" value="0" min="0" max="25" aria-label="row 1 column 2" />
@@ -886,18 +930,18 @@
           </div>
           </div>
 
-          <button class="btn-run" id="hill-run" type="button" onclick="runHill()">Encrypt</button>
+          <button class="btn-run" id="hill-run" type="button" onclick="runHill()">Pelajari</button>
           <div class="error-region" id="hill-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="hill-result-box">
-            <div class="result-label" id="hill-result-label">Encrypted Output</div>
+            <div class="result-label" id="hill-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="hill-result-text"></div>
             <button class="btn-copy" id="hill-copy-btn" type="button" onclick="copyResult('hill')">Copy</button>
           </div>
           <div class="process-box" id="hill-process">
-            <div class="empty-state">Run Hill to see the key matrix, vectors, and multiplication modulo 26.</div>
+            <div class="empty-state">Jalankan Hill untuk melihat matriks kunci, vektor huruf, dan perkalian modulo 26.</div>
           </div>
         </div>
       </div>
@@ -909,43 +953,43 @@
         <div>
           <p class="section-kicker">Digraph substitution</p>
           <h2>Playfair Cipher</h2>
-          <p>Rules: same row shifts horizontally, same column shifts vertically, rectangle swaps columns.</p>
+          <p>Konsep inti: pasangan huruf mengikuti aturan baris, kolom, atau persegi pada tabel 5x5.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="playfair-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('playfair', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('playfair', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="playfair-text">Input Text <span>*</span></label>
+            <label class="form-label" for="playfair-text">Teks masukan <span>*</span></label>
             <textarea id="playfair-text" placeholder="Hide the gold"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="playfair-key">Keyword <span>*</span></label>
+            <label class="form-label" for="playfair-key">Kata kunci <span>*</span></label>
             <input type="text" id="playfair-key" placeholder="MONARCHY" autocomplete="off" />
           </div>
           <div class="preview-panel" id="playfair-table-wrap" hidden>
-            <p class="form-label">Live 5x5 Key Square</p>
+            <p class="form-label">Kotak kunci 5x5 langsung</p>
             <div class="playfair-table" id="playfair-table-grid"></div>
           </div>
-          <button class="btn-run" id="playfair-run" type="button" onclick="runPlayfair()">Encrypt</button>
+          <button class="btn-run" id="playfair-run" type="button" onclick="runPlayfair()">Pelajari</button>
           <div class="error-region" id="playfair-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="playfair-result-box">
-            <div class="result-label" id="playfair-result-label">Encrypted Output</div>
+            <div class="result-label" id="playfair-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="playfair-result-text"></div>
             <button class="btn-copy" id="playfair-copy-btn" type="button" onclick="copyResult('playfair')">Copy</button>
           </div>
           <div class="process-box" id="playfair-process">
-            <div class="empty-state">Run Playfair to see the 5x5 table, letter pairs, and rule used per pair.</div>
+            <div class="empty-state">Jalankan Playfair untuk melihat tabel 5x5, pasangan huruf, dan aturan yang dipakai tiap pasangan.</div>
           </div>
         </div>
       </div>
@@ -1012,6 +1056,33 @@
         M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) +
         M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0])
       );
+    }
+
+    // General determinant using recursive cofactor expansion (works for n<=6)
+    function detN(M) {
+      const n = M.length;
+      if (n === 0) return 0;
+      if (n === 1) return Number(M[0][0]);
+      if (n === 2) return det2(M);
+      if (n === 3) return det3(M);
+      let det = 0;
+      for (let c = 0; c < n; c++) {
+        // build submatrix excluding row 0 and column c
+        const sub = [];
+        for (let i = 1; i < n; i++) {
+          const row = [];
+          for (let j = 0; j < n; j++) if (j !== c) row.push(M[i][j]);
+          sub.push(row);
+        }
+        det += ((c % 2 === 0) ? 1 : -1) * Number(M[0][c]) * detN(sub);
+      }
+      return det;
+    }
+
+    function hillDeterminant(mat) {
+      // ensure numbers
+      const M = mat.map(r => r.map(v => Number(v)));
+      return detN(M);
     }
 
     function inverseMatrix2(M) {
@@ -1405,8 +1476,39 @@
     async function runHill() {
       const text = document.getElementById('hill-text').value.trim();
       const matrix = getHillMatrix();
-      const key_matrix = matrix.flat();
-      await callAPI('/api/hill', { text, key_matrix, size: hillSize, mode: state.hill.mode }, 'hill');
+      // flatten and validate
+      const key_flat = matrix.flat();
+      const expected = hillSize * hillSize;
+      // ensure all entries present and are integers
+      if (key_flat.length !== expected) {
+        showError('hill', `Kunci matriks tidak lengkap: diharapkan ${expected} nilai.`);
+        return;
+      }
+      const parsed = [];
+      for (let i = 0; i < key_flat.length; i++) {
+        const v = String(key_flat[i]).trim();
+        if (v === '') {
+          showError('hill', `Isi semua sel matriks sebelum menjalankan. Sel ke-${i + 1} kosong.`);
+          return;
+        }
+        const n = Number(v);
+        if (!Number.isInteger(n)) {
+          showError('hill', `Nilai pada sel ke-${i + 1} bukan integer yang valid.`);
+          return;
+        }
+        parsed.push(((n % 26) + 26) % 26);
+      }
+
+      // Check determinant and invertibility before calling API when decrypting
+      const det = hillDeterminant(matrix);
+      const detMod = ((det % 26) + 26) % 26;
+      const inv = gcd(detMod, 26) === 1;
+      if (state.hill.mode === 'decrypt' && !inv) {
+        showError('hill', `Matriks tidak dapat dibalik: det(K)=${det} (mod26=${detMod}) bukan koprima dengan 26.`);
+        return;
+      }
+
+      await callAPI('/api/hill', { text, key_matrix: parsed, size: hillSize, mode: state.hill.mode }, 'hill');
     }
 
     async function runPlayfair() {

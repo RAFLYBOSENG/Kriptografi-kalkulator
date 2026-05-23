@@ -95,7 +95,103 @@ http://127.0.0.1:5000/kalkulator
 4. Lihat hasil akhir, langkah proses, dan visualisasi pendukung.
 5. Riwayat hasil akan tersimpan otomatis di server.
 
+## API
 
+Semua endpoint utama menerima data JSON dan mengembalikan hasil beserta `steps`.
+
+### Caesar
+
+```http
+POST /api/caesar
+```
+
+Body:
+
+```json
+{
+	"text": "HELLO",
+	"shift": 3,
+	"mode": "encrypt"
+}
+```
+
+Catatan: `shift` wajib berada pada rentang 1–25.
+
+### Vigenère
+
+```http
+POST /api/vigenere
+```
+
+Body:
+
+```json
+{
+	"text": "HELLO",
+	"key": "KEY",
+	"mode": "encrypt"
+}
+```
+
+### Affine
+
+```http
+POST /api/affine
+```
+
+Body:
+
+```json
+{
+	"text": "HELLO",
+	"a": 5,
+	"b": 8,
+	"mode": "encrypt"
+}
+```
+
+### Hill
+
+```http
+POST /api/hill
+```
+
+Body:
+
+```json
+{
+	"text": "HELP",
+	"key_matrix": [3, 3, 2, 5],
+	"size": 2,
+	"mode": "encrypt"
+}
+```
+
+Ukuran yang didukung: `2`, `3`, dan `6`.
+
+### Playfair
+
+```http
+POST /api/playfair
+```
+
+Body:
+
+```json
+{
+	"text": "HELLO",
+	"key": "SECRET",
+	"mode": "encrypt"
+}
+```
+
+### Riwayat
+
+```http
+GET /api/history
+POST /api/history
+DELETE /api/history
+```
 
 ## Catatan Penting
 

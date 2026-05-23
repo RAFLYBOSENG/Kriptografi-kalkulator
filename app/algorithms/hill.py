@@ -142,6 +142,9 @@ def decrypt(text: str, key_matrix) -> Dict[str, object]:
     inv = _matrix_inverse_mod(key_matrix, 26)
     steps.append(f"Inverse matrix mod26 computed")
     letters = [c for c in text if c.isalpha()]
+    # ensure letters length is a multiple of n to avoid short final block
+    while len(letters) % n != 0:
+        letters.append('X')
     out_letters: List[str] = []
     idx = 0
     for block in _chunks(letters, n):
