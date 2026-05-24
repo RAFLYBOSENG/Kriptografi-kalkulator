@@ -1,9 +1,9 @@
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
-_HISTORY_PATH = Path('instance') / 'history.json'
+_HISTORY_PATH = Path(__file__).resolve().parents[2] / 'instance' / 'history.json'
 
 
 def load_history():

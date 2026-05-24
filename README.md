@@ -87,6 +87,16 @@ Lalu buka:
 http://127.0.0.1:5000/kalkulator
 ```
 
+## Deploy ke Render
+
+Project ini sudah disiapkan agar bisa dijalankan di Render sebagai web service.
+
+1. Buat Web Service baru di Render dan hubungkan repository ini.
+2. Gunakan konfigurasi berikut:
+	- Build Command: `pip install -r requirements.txt`
+	- Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT`
+3. Setelah deploy selesai, tambahkan custom domain di Render jika ingin memakai domain sendiri.
+
 ## Cara Pakai
 
 1. Pilih algoritma yang ingin dicoba.

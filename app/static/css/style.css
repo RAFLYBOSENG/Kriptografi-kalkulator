@@ -876,6 +876,13 @@ input[type="number"] {
     grid-template-columns: 1fr;
   }
 
+  .history-scroll:not(.empty) {
+    max-height: 52vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.35rem;
+  }
+
   .history-actions {
     width: 100%;
   }
@@ -902,6 +909,10 @@ input[type="number"] {
 }
 
 @media (max-width: 430px) {
+  .history-scroll:not(.empty) {
+    max-height: 42vh;
+  }
+
   .nav-link {
     padding-inline: 10px;
   }
