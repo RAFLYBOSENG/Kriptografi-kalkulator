@@ -5,7 +5,7 @@
 {% block content %}
   <h1 class="h3">History</h1>
   <p class="text-muted">Riwayat enkripsi dan dekripsi akan ditampilkan di sini.</p>
-  <div class="mt-3 history-scroll">
+  <div class="mt-3 history-scroll{% if not history %} empty{% endif %}">
     {% if history %}
       <ul class="list-group">
         {% for h in history|reverse %}
