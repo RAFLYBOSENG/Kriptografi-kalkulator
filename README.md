@@ -87,27 +87,15 @@ Lalu buka:
 http://127.0.0.1:5000/kalkulator
 ```
 
-## Deploy ke Railway
+## Deploy ke Render
 
-Project ini sudah disiapkan untuk Railway sebagai web service.
+Project ini sudah disiapkan agar bisa dijalankan di Render sebagai web service.
 
-1. Buat project baru di Railway dan hubungkan repository ini.
-2. Railway akan memakai `Procfile` yang sudah ada, dengan command:
-	- `web: gunicorn app:app --bind 0.0.0.0:$PORT`
-3. Pastikan service memiliki environment variable `PORT` dari Railway dan, jika diperlukan, tambahkan `SECRET_KEY`.
-4. Jika ingin memakai domain sendiri, tambahkan custom domain di Railway lalu arahkan DNS di provider domain ke record yang diberikan Railway.
-
-## SEO Dan Domain
-
-Untuk memakai domain `https://kriptografly.my.id`, set environment variable berikut saat deploy:
-
-```text
-SITE_URL=https://kriptografly.my.id
-SITE_NAME=CipherLab
-SITE_DESCRIPTION=Belajar kriptografi klasik dengan Caesar, Vigenere, Affine, Hill, dan Playfair secara interaktif.
-```
-
-Setelah domain aktif, daftarkan situs ke Google Search Console dan kirim `https://kriptografly.my.id/sitemap.xml` agar proses indeks lebih cepat. Perlu dicatat, rekomendasi saat orang baru mengetik beberapa huruf di browser atau mesin pencari tidak bisa dipaksa dari kode saja; itu bergantung pada indeks search engine, trafik, backlink, bookmark, dan riwayat pengguna.
+1. Buat Web Service baru di Render dan hubungkan repository ini.
+2. Gunakan konfigurasi berikut:
+	- Build Command: `pip install -r requirements.txt`
+	- Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT`
+3. Setelah deploy selesai, tambahkan custom domain di Render jika ingin memakai domain sendiri.
 
 ## Cara Pakai
 
