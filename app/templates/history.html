@@ -1,16 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}History - Kriptografi Klasik{% endblock %}
+{% block title %}Riwayat Enkripsi dan Dekripsi Kriptografi Klasik{% endblock %}
+{% block meta_description %}Lihat riwayat enkripsi dan dekripsi pada CipherLab untuk Caesar, Vigenere, Affine, Hill, dan Playfair dalam satu halaman.{% endblock %}
+{% block meta_keywords %}riwayat enkripsi, riwayat dekripsi, kriptografi klasik, Caesar Cipher, Vigenere Cipher, Affine Cipher, Hill Cipher, Playfair Cipher{% endblock %}
+{% block og_title %}Riwayat Enkripsi dan Dekripsi | CipherLab{% endblock %}
+{% block og_description %}Halaman riwayat untuk melihat hasil enkripsi dan dekripsi kriptografi klasik di CipherLab.{% endblock %}
+{% block twitter_title %}Riwayat Enkripsi dan Dekripsi | CipherLab{% endblock %}
+{% block twitter_description %}Lihat riwayat hasil enkripsi dan dekripsi kriptografi klasik.{% endblock %}
 
 {% block content %}
   <h1 class="h3">History</h1>
   <p class="text-muted">Riwayat enkripsi dan dekripsi akan ditampilkan di sini.</p>
-  <div class="mt-3">
+  <div class="mt-3 history-scroll{% if not history %} empty{% endif %}">
     {% if history %}
       <ul class="list-group">
         {% for h in history|reverse %}
           <li class="list-group-item">
-            <strong>{{ h.algorithm }}</strong> - {{ h.mode }} - <em>{{ h.text }}</em>
+            <div><strong>{{ h.algorithm }}</strong> - {{ h.mode }} <small class="text-muted">{{ h.time }}</small></div>
+            <div><em>{{ h.text }}</em></div>
             <div class="mt-1">Result: <code>{{ h.result }}</code></div>
           </li>
         {% endfor %}

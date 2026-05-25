@@ -4,79 +4,764 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CipherLab - Classical Cipher Workbench</title>
-  <meta name="description" content="Classical cipher toolkit supporting Caesar, Vigenere, Affine, Hill, and Playfair ciphers." />
+    <title>Kalkulator Kriptografi Klasik Caesar, Vigenere, Affine, Hill, Playfair</title>
+    <meta name="description" content="Gunakan kalkulator kriptografi klasik CipherLab untuk Caesar, Vigenere, Affine, Hill, dan Playfair dengan langkah perhitungan yang jelas." />
+    <meta name="keywords" content="kalkulator kriptografi klasik, kalkulator Caesar Cipher, kalkulator Vigenere Cipher, kalkulator Affine Cipher, kalkulator Hill Cipher, kalkulator Playfair Cipher, enkripsi, dekripsi" />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="{{ site_url }}{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:title" content="Kalkulator Kriptografi Klasik Caesar, Vigenere, Affine, Hill, Playfair">
+    <meta property="og:description" content="Kalkulator kriptografi klasik interaktif untuk Caesar, Vigenere, Affine, Hill, dan Playfair dengan langkah yang jelas.">
+    <meta property="og:url" content="{{ site_url }}{{ request.path }}">
+    <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='img/logo-cipherlab.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo-cipherlab.svg') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <style>
-    /* Minimal layout guard when project CSS not present */
-    body { font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial; margin:0; padding:0; }
-    .site-nav{background:#0b2545;color:#fff;padding:.5rem 1rem;position:sticky;top:0;z-index:40}
-    .nav-inner{display:flex;align-items:center;gap:1rem}
-    .nav-links{display:flex;list-style:none;margin:0;padding:0;gap:.5rem}
-    .nav-link{color:#cfe3ff;text-decoration:none}
-    main{padding:1rem;max-width:1100px;margin:0 auto}
-    .cipher-grid{display:flex;gap:1rem}
-    .cipher-card{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex:1}
-    .output-stack{width:360px}
-    .result-box{background:#f6f9ff;padding:.75rem;border-radius:6px;margin-bottom:1rem}
-    .process-box{background:#fff;padding:.75rem;border-radius:6px;border:1px dashed #e6eef8;min-height:120px}
-    .matrix-visual{display:grid;gap:4px}
-    .matrix-visual span{display:inline-grid;place-items:center;padding:.5rem;border:1px solid #ddd}
+    :root {
+      --space-0: #040814;
+      --space-1: #0a1230;
+      --space-2: #13275c;
+      --nebula: #2ae3b7;
+      --starlight: #9fc9ff;
+      --ink: #e6f0ff;
+      --muted: #b5c7e6;
+      --line: rgba(169, 198, 255, 0.24);
+      --card: rgba(10, 19, 48, 0.7);
+      --btn-primary: linear-gradient(120deg, #4ce8c1, #83b6ff);
+      --text-muted: #b5c7e6;
+    }
+
+    [data-theme="light"] {
+      --space-0: #f5f7fa;
+      --space-1: #e9ecf2;
+      --space-2: #d9e3ed;
+      --nebula: #0d9f7f;
+      --starlight: #2563a8;
+      --ink: #1a2847;
+      --muted: #475569;
+      --line: rgba(51, 114, 198, 0.14);
+      --card: rgba(226, 232, 240, 0.75);
+      --btn-primary: linear-gradient(120deg, #0d9f7f, #2563a8);
+      --text-muted: #475569;
+    }
+
+    body {
+      font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial;
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at 16% 12%, rgba(42, 227, 183, 0.22), transparent 40%),
+        radial-gradient(circle at 84% 22%, rgba(159, 201, 255, 0.24), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(47, 91, 183, 0.3), transparent 58%),
+        linear-gradient(150deg, var(--space-0) 0%, var(--space-1) 58%, var(--space-2) 100%);
+      color: var(--ink);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      background-image:
+        radial-gradient(1.6px 1.6px at 5% 12%, rgba(255,255,255,0.95), transparent),
+        radial-gradient(1px 1px at 12% 34%, rgba(255,255,255,0.85), transparent),
+        radial-gradient(2px 2px at 18% 30%, rgba(255,255,255,0.98), transparent),
+        radial-gradient(1px 1px at 24% 8%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1.2px 1.2px at 32% 14%, rgba(255,255,255,0.75), transparent),
+        radial-gradient(1px 1px at 38% 48%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.4px 1.4px at 48% 62%, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 56% 28%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 63% 42%, rgba(255,255,255,0.78), transparent),
+        radial-gradient(1px 1px at 71% 16%, rgba(255,255,255,0.76), transparent),
+        radial-gradient(1px 1px at 84% 22%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90% 72%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 9% 82%, rgba(255,255,255,0.8), transparent);
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      /* initial positions (y offsets will be animated in `fall`) */
+      background-position: 5% 12%, 12% 34%, 18% 30%, 24% 8%, 32% 14%, 38% 48%, 48% 62%, 56% 28%, 63% 42%, 71% 16%, 84% 22%, 90% 72%, 9% 82%;
+      opacity: 0.6;
+      /* twinkle + gentle falling; reduced fall duration for slightly faster descent */
+      animation: twinkle 5.5s ease-in-out infinite, fall 14s linear infinite;
+    }
+
+    body::after {
+      background: radial-gradient(circle at 50% 50%, rgba(42, 227, 183, 0.12), transparent 45%);
+      animation: drift 14s linear infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.75; }
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Gentle falling motion for stars (animates background-position downwards) */
+    @keyframes fall {
+      0% {
+        background-position: 5% 12%, 12% 34%, 18% 30%, 24% 8%, 32% 14%, 38% 48%, 48% 62%, 56% 28%, 63% 42%, 71% 16%, 84% 22%, 90% 72%, 9% 82%;
+        opacity: 0.7;
+      }
+      70% {
+        opacity: 0.55;
+      }
+      100% {
+        background-position: 5% 160%, 12% 184%, 18% 150%, 24% 128%, 32% 144%, 38% 182%, 48% 196%, 56% 148%, 63% 162%, 71% 130%, 84% 158%, 90% 192%, 9% 202%;
+        opacity: 0.45;
+      }
+    }
+
+    [data-theme="light"] body {
+      background:
+        radial-gradient(circle at 16% 12%, rgba(13, 159, 127, 0.08), transparent 40%),
+        radial-gradient(circle at 84% 22%, rgba(37, 99, 168, 0.09), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(37, 99, 168, 0.12), transparent 58%),
+        linear-gradient(150deg, #f5f7fa 0%, #e9ecf2 58%, #e0e7f1 100%);
+    }
+
+    /* Light theme overrides for UI components to ensure good contrast */
+    [data-theme="light"] .site-nav {
+      background: rgba(255,255,255,0.9);
+      color: var(--ink);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: none;
+    }
+
+    [data-theme="light"] .nav-link { color: var(--ink); }
+
+    [data-theme="light"] .theme-toggle {
+      background: rgba(37,99,168,0.06);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    [data-theme="light"] .cipher-card,
+    [data-theme="light"] .hero-panel,
+    [data-theme="light"] .history-panel,
+    [data-theme="light"] .result-box,
+    [data-theme="light"] .process-box {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    [data-theme="light"] input,
+    [data-theme="light"] textarea,
+    [data-theme="light"] select {
+      background: #ffffff;
+      color: var(--ink);
+      border: 1px solid rgba(25,40,70,0.12);
+    }
+
+    [data-theme="light"] .matrix-inputs input {
+      background: #ffffff;
+      color: var(--ink);
+      border: 1px solid rgba(25,40,70,0.12);
+    }
+
+    [data-theme="light"] .btn-run,
+    [data-theme="light"] .btn-secondary {
+      color: #071428;
+    }
+
+    [data-theme="light"] .help-text,
+    [data-theme="light"] .result-label { color: var(--muted); }
+
+    [data-theme="light"] .error-region .error-msg { color: #9b1c1c; }
+
+    .site-nav {
+      background: rgba(4, 8, 20, 0.7);
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      padding: .5rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-inner { display: flex; align-items: center; gap: 1rem }
+    .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: .5rem }
+    .nav-link { color: var(--ink); text-decoration: none }
+    .theme-toggle { background: rgba(159, 201, 255, 0.16); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.7rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .theme-toggle:hover { background: rgba(159, 201, 255, 0.28); }
+
+    main { padding: 1rem; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1 }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-inner { gap: 0.5rem }
+      .nav-links { gap: 0.3rem }
+      .nav-link { font-size: 0.85rem }
+      main { padding: 0.75rem; }
+
+      .hero {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 14px;
+      }
+
+      .hero-copy h1 { font-size: 1.5rem; }
+      .hero-copy p { max-width: 100%; }
+
+      .hero-panel {
+        min-width: 100%;
+        flex-shrink: 1;
+      }
+
+      .metric-value { font-size: 1.5rem; }
+      .cipher-grid { flex-direction: column; gap: 1rem; }
+      .output-stack { width: 100%; }
+
+    .history-scroll:not(.empty) {
+      max-height: 52vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 0.35rem;
+    }
+      .history-panel { padding: 0.75rem; margin-bottom: 1rem; }
+      .history-panel h2 { font-size: 1rem; }
+      .history-scroll:not(.empty) { max-height: 48vh; }
+
+      .cipher-card { padding: 0.75rem; }
+      .btn-run, .btn-secondary { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
+      .btn-copy { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+
+      textarea, input[type="text"], input[type="number"] { padding: 0.5rem; font-size: 0.95rem; }
+      .form-label { font-size: 0.85rem; }
+
+      .segmented { gap: 0.2rem; }
+      .segment { padding: 0.4rem; font-size: 0.8rem; }
+
+      .section-code { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+      .section-head { gap: 0.75rem; }
+      .section-head > div h2 { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .site-nav { padding: 0.4rem 0.5rem; }
+      .nav-inner { gap: 0.3rem; flex-wrap: wrap; }
+      .nav-links { gap: 0.2rem; font-size: 0.75rem; }
+      .theme-toggle { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+      main { padding: 0.5rem; }
+
+      .hero {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+      }
+
+      .hero-copy h1 { font-size: 1.25rem; }
+      .hero-copy p { font-size: 0.9rem; }
+      .hero-copy > div { font-size: 0.8rem; }
+
+      .metric-value { font-size: 1.2rem; }
+      .metric-label { font-size: 0.7rem; }
+
+      .history-panel { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .history-panel h2 { font-size: 0.9rem; margin: 0.3rem 0 0.5rem; }
+      .history-scroll:not(.empty) { max-height: 42vh; }
+      .history-list .history-item { padding: 0.5rem; font-size: 0.8rem; }
+
+      .cipher-section { padding-top: 1rem; margin-bottom: 1.5rem; }
+      .cipher-grid { gap: 0.75rem; }
+      .cipher-card { padding: 0.6rem; border-radius: 10px; }
+
+      .form-label { font-size: 0.75rem; margin-bottom: 0.25rem; }
+      textarea, input[type="text"], input[type="number"] {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+      }
+
+      .btn-run, .btn-secondary {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+
+      .result-box { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .result-label { font-size: 0.7rem; }
+      .process-box { padding: 0.5rem; min-height: 100px; font-size: 0.8rem; }
+
+      .segmented { gap: 0.15rem; padding: 0.2rem; }
+      .segment { padding: 0.3rem; font-size: 0.7rem; }
+
+      .section-code { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
+      .section-head { gap: 0.5rem; }
+      .section-head > div h2 { font-size: 1rem; }
+      .section-kicker { font-size: 0.7rem; }
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-inner { gap: 0.5rem }
+      .nav-links { gap: 0.3rem }
+      .nav-link { font-size: 0.85rem }
+      main { padding: 0.75rem; }
+
+      .hero {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 14px;
+      }
+
+      .hero-copy h1 { font-size: 1.5rem; }
+      .hero-copy p { max-width: 100%; }
+
+      .hero-panel {
+        min-width: 100%;
+        flex-shrink: 1;
+      }
+
+      .metric-value { font-size: 1.5rem; }
+      .cipher-grid { flex-direction: column; gap: 1rem; }
+      .output-stack { width: 100%; }
+
+      .history-panel { padding: 0.75rem; margin-bottom: 1rem; }
+      .history-panel h2 { font-size: 1rem; }
+
+      .cipher-card { padding: 0.75rem; }
+      .btn-run, .btn-secondary { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
+      .btn-copy { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+
+      textarea, input[type="text"], input[type="number"] { padding: 0.5rem; font-size: 0.95rem; }
+      .form-label { font-size: 0.85rem; }
+
+      .segmented { gap: 0.2rem; }
+      .segment { padding: 0.4rem; font-size: 0.8rem; }
+
+      .section-code { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+      .section-head { gap: 0.75rem; }
+      .section-head > div h2 { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .site-nav { padding: 0.4rem 0.5rem; }
+      .nav-inner { gap: 0.3rem; flex-wrap: wrap; }
+      .nav-links { gap: 0.2rem; font-size: 0.75rem; }
+      .theme-toggle { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+      main { padding: 0.5rem; }
+
+      .hero {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+      }
+
+      .hero-copy h1 { font-size: 1.25rem; }
+      .hero-copy p { font-size: 0.9rem; }
+      .hero-copy > div { font-size: 0.8rem; }
+
+      .metric-value { font-size: 1.2rem; }
+      .metric-label { font-size: 0.7rem; }
+
+      .history-panel { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .history-panel h2 { font-size: 0.9rem; margin: 0.3rem 0 0.5rem; }
+      .history-list .history-item { padding: 0.5rem; font-size: 0.8rem; }
+
+      .cipher-section { padding-top: 1rem; margin-bottom: 1.5rem; }
+      .cipher-grid { gap: 0.75rem; }
+      .cipher-card { padding: 0.6rem; border-radius: 10px; }
+
+      .form-label { font-size: 0.75rem; margin-bottom: 0.25rem; }
+      textarea, input[type="text"], input[type="number"] {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+        border-radius: 6px;
+      }
+
+      .btn-run, .btn-secondary {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+      }
+
+      .result-box { padding: 0.5rem; margin-bottom: 0.75rem; }
+      .result-label { font-size: 0.7rem; }
+      .process-box { padding: 0.5rem; min-height: 100px; font-size: 0.8rem; }
+
+      .segmented { gap: 0.15rem; padding: 0.2rem; }
+      .segment { padding: 0.3rem; font-size: 0.7rem; }
+
+      .section-code { width: 2.2rem; height: 2.2rem; font-size: 0.9rem; }
+      .section-head { gap: 0.5rem; }
+      .section-head > div h2 { font-size: 1rem; }
+      .section-kicker { font-size: 0.7rem; }
+    }
+
+    .hero {
+      background: linear-gradient(140deg, rgba(4, 8, 20, 0.84), rgba(26, 51, 108, 0.6));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 15px 34px rgba(2, 5, 15, 0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .hero-copy h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: var(--ink);
+      text-shadow: 0 0 14px rgba(159, 201, 255, 0.34);
+    }
+
+    .hero-copy .eyebrow {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--nebula);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .hero-copy p { color: var(--muted); margin: 0.5rem 0 0; max-width: 600px; line-height: 1.5; }
+
+    .hero-panel {
+      background: rgba(6, 14, 36, 0.68);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.2rem;
+      min-width: 240px;
+      flex-shrink: 0;
+    }
+
+    .hero-panel > div {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-panel > div:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .metric-value { display: block; font-size: 1.8rem; font-weight: 700; color: var(--starlight); }
+    .metric-label { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .history-panel {
+      background: rgba(6, 14, 36, 0.68);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .history-panel h2 { margin: 0.5rem 0 1rem; color: var(--ink); font-size: 1.2rem; }
+    .history-panel .panel-kicker { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; letter-spacing: 0.05em; margin: 0; }
+
+    .history-list { color: var(--muted) }
+    .history-list.empty { text-align: center; padding: 1rem; }
+    .history-list .history-item {
+      background: rgba(10, 19, 48, 0.5);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .history-item strong { color: var(--starlight) }
+    .history-item code { background: rgba(159, 201, 255, 0.08); padding: 0.2rem 0.4rem; border-radius: 4px; color: var(--nebula) }
+
+    .cipher-grid { display: flex; gap: 1rem }
+    .cipher-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(3, 7, 20, 0.35);
+      flex: 1;
+      backdrop-filter: blur(3px);
+    }
+
+    .output-stack { width: 360px }
+
+    .result-box {
+      background: rgba(159, 201, 255, 0.08);
+      padding: .75rem;
+      border-radius: 9px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--line);
+    }
+
+    .result-label { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .result-text { word-break: break-all; color: var(--ink); font-weight: 600; }
+
+    .process-box {
+      background: rgba(6, 14, 36, 0.68);
+      padding: .75rem;
+      border-radius: 9px;
+      border: 1px dashed var(--line);
+      min-height: 120px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .matrix-visual { display: grid; gap: 4px }
+    .matrix-visual span {
+      display: inline-grid;
+      place-items: center;
+      padding: .5rem;
+      border: 1px solid var(--line);
+      background: rgba(159, 201, 255, 0.08);
+      border-radius: 6px;
+      color: var(--ink);
+    }
+
+    /* Matrix input grid for Hill cipher key entry */
+    .matrix-inputs {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 2), 1fr);
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .matrix-inputs input {
+      width: 100%;
+      padding: 0.45rem;
+      text-align: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(159, 201, 255, 0.04);
+      color: var(--ink);
+      box-sizing: border-box;
+    }
+
+    .matrix-2 { --cols: 2 }
+    .matrix-3 { --cols: 3 }
+    .matrix-6 { --cols: 6 }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .form-label span { color: var(--nebula) }
+
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(159, 201, 255, 0.08);
+      color: var(--ink);
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: var(--nebula);
+      box-shadow: 0 0 12px rgba(42, 227, 183, 0.2);
+    }
+
+    .btn-run, .btn-secondary {
+      background: var(--btn-primary);
+      color: #051024;
+      border: 0;
+      padding: 0.65rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(42, 227, 183, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-run:hover, .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(42, 227, 183, 0.48);
+    }
+
+    .btn-copy {
+      background: rgba(159, 201, 255, 0.16);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-copy:hover { background: rgba(159, 201, 255, 0.28) }
+
+    .segmented {
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(6, 14, 36, 0.68);
+      padding: 0.3rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .segment {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .segment.active {
+      background: rgba(42, 227, 183, 0.12);
+      color: var(--nebula);
+      border-color: rgba(42, 227, 183, 0.45);
+    }
+
+    .section-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      background: linear-gradient(135deg, rgba(42, 227, 183, 0.16), rgba(159, 201, 255, 0.16));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--nebula);
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .error-region { color: #ff6b6b; font-size: 0.9rem; margin-top: 0.5rem; }
+    .help-text { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+
+    .cipher-section {
+      border-top: 1px solid var(--line);
+      padding-top: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-head {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-head > div h2 { margin: 0.3rem 0 0; color: var(--ink); font-size: 1.4rem; }
+    .section-kicker { font-size: 0.8rem; text-transform: uppercase; color: var(--nebula); font-weight: 700; margin: 0; letter-spacing: 0.05em; }
+    .section-head > div p { margin: 0.3rem 0; color: var(--muted); font-size: 0.9rem; }
   </style>
 </head>
 
 <body>
-  <nav class="site-nav" id="site-nav" aria-label="Cipher navigation">
-    <div class="nav-inner">
-      <a class="nav-brand" href="#top" aria-label="CipherLab home">
-        <span class="brand-mark">CL</span>
-        <span>CipherLab</span>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand nav-brand" href="/" aria-label="Beranda Kriptografi Klasik">
+        <img class="brand-logo" src="{{ url_for('static', filename='img/logo-cipherlab.svg') }}" alt="" aria-hidden="true">
+        <span class="brand-text">Kriptografi Klasik</span>
       </a>
-      <ul class="nav-links" role="list">
-        <li><a class="nav-link" href="#caesar-section" data-target="caesar-section">Caesar</a></li>
-        <li><a class="nav-link" href="#vigenere-section" data-target="vigenere-section">Vigenere</a></li>
-        <li><a class="nav-link" href="#affine-section" data-target="affine-section">Affine</a></li>
-        <li><a class="nav-link" href="#hill-section" data-target="hill-section">Hill</a></li>
-        <li><a class="nav-link" href="#playfair-section" data-target="playfair-section">Playfair</a></li>
-      </ul>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme">Dark</button>
+      <div class="d-flex">
+        <a class="nav-link text-light" href="/kalkulator">Kalkulator</a>
+        <a class="nav-link text-light" href="/history">History</a>
+        <button id="theme-toggle" class="btn btn-sm btn-outline-light ms-2">Toggle Theme</button>
+      </div>
     </div>
   </nav>
 
   <main class="page-shell" id="top">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "CipherLab",
+        "url": "{{ site_url }}",
+        "description": "Kalkulator dan pembelajaran kriptografi klasik interaktif.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "{{ site_url }}/kalkulator",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
     <header class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">Classical Cryptography Workbench</div>
+        <div class="eyebrow">Laboratorium belajar kriptografi klasik</div>
         <h1>CipherLab</h1>
         <p>
-          Encrypt, decrypt, and inspect every step behind Caesar, Vigenere, Affine, Hill, and Playfair ciphers.
+          Gunakan halaman ini untuk memahami bagaimana teks berubah menjadi cipher, lalu ikuti langkah demi langkah supaya rumus, kunci, dan hasilnya menjadi jelas.
         </p>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(169, 198, 255, 0.24);">
+          <p style="font-size: 0.9rem; margin: 0.5rem 0; color: var(--muted);">
+            <strong style="color: var(--nebula);">Panduan cepat belajar:</strong> Pilih algoritma di bawah, masukkan teks dan kunci, lalu tekan Encrypt/Decrypt untuk melihat hasil, langkah transformasi, dan pola matematikanya.
+          </p>
+        </div>
       </div>
       <aside class="hero-panel" aria-label="Workbench summary">
         <div>
           <span class="metric-value">5</span>
-          <span class="metric-label">cipher modules</span>
+          <span class="metric-label">algoritma yang dipelajari</span>
         </div>
         <div>
           <span class="metric-value">26</span>
-          <span class="metric-label">alphabet modulus</span>
+          <span class="metric-label">modulus alfabet</span>
         </div>
         <div>
           <span class="metric-value">A=0</span>
-          <span class="metric-label">calculation model</span>
+          <span class="metric-label">model perhitungan</span>
         </div>
       </aside>
     </header>
 
+    <section class="history-panel" aria-labelledby="learning-title">
+      <div>
+        <p class="panel-kicker">Fokus belajar</p>
+        <h2 id="learning-title">Apa yang perlu diperhatikan</h2>
+      </div>
+      <div class="history-list">
+        <article class="history-item">
+          <strong>Caesar dan Vigenere</strong>
+          <p>Perhatikan pergeseran huruf dan lihat bagaimana satu kunci dipakai berulang untuk mengubah alfabet.</p>
+        </article>
+        <article class="history-item">
+          <strong>Affine dan Hill</strong>
+          <p>Amati hubungan rumus modular, determinan, dan invers matriks untuk memahami mengapa kunci tertentu valid atau tidak.</p>
+        </article>
+        <article class="history-item">
+          <strong>Playfair</strong>
+          <p>Lihat pasangan huruf, tabel 5x5, dan aturan baris-kolom-persegi agar proses digraf mudah diikuti.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="history-panel" aria-labelledby="history-title">
       <div>
-        <p class="panel-kicker">Session history</p>
-        <h2 id="history-title">Recent operations</h2>
+        <p class="panel-kicker">Jejak latihan</p>
+        <h2 id="history-title">Operasi terbaru</h2>
       </div>
       <div class="history-actions">
-        <button class="btn-secondary" type="button" onclick="clearHistory()">Clear history</button>
+        <button class="btn-secondary" type="button" onclick="clearHistory()">Hapus jejak</button>
       </div>
-      <div class="history-list empty" id="history-list">No encryption or decryption history yet.</div>
+      <div class="history-list empty history-scroll" id="history-list">Belum ada latihan enkripsi atau dekripsi.</div>
     </section>
 
     <section class="cipher-section" id="caesar-section" data-cipher="caesar">
@@ -85,39 +770,39 @@
         <div>
           <p class="section-kicker">Monoalphabetic shift</p>
           <h2>Caesar Cipher</h2>
-          <p>Formula: E(x) = (x + k) mod 26, D(y) = (y - k) mod 26</p>
+          <p>Konsep inti: geser setiap huruf sebesar k langkah pada alfabet.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="caesar-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('caesar', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('caesar', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="caesar-text">Input Text <span>*</span></label>
-            <textarea id="caesar-text" placeholder="Type or paste your message here"></textarea>
+            <label class="form-label" for="caesar-text">Teks masukan <span>*</span></label>
+            <textarea id="caesar-text" placeholder="Ketik pesan yang ingin dipelajari"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="caesar-shift">Shift Value <span>*</span></label>
-            <input type="number" id="caesar-shift" placeholder="3" min="0" max="25" />
+            <label class="form-label" for="caesar-shift">Nilai geser <span>*</span></label>
+            <input type="number" id="caesar-shift" placeholder="3" min="1" max="25" />
           </div>
-          <button class="btn-run" id="caesar-run" type="button" onclick="runCaesar()">Encrypt</button>
+          <button class="btn-run" id="caesar-run" type="button" onclick="runCaesar()">Pelajari</button>
           <div class="error-region" id="caesar-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="caesar-result-box">
-            <div class="result-label" id="caesar-result-label">Encrypted Output</div>
+            <div class="result-label" id="caesar-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="caesar-result-text"></div>
             <button class="btn-copy" id="caesar-copy-btn" type="button" onclick="copyResult('caesar')">Copy</button>
           </div>
           <div class="process-box" id="caesar-process">
-            <div class="empty-state">Run Caesar to see the shift formula and character-by-character steps.</div>
+            <div class="empty-state">Jalankan Caesar untuk melihat rumus geser dan langkah tiap karakter.</div>
           </div>
         </div>
       </div>
@@ -129,39 +814,39 @@
         <div>
           <p class="section-kicker">Polyalphabetic keyword</p>
           <h2>Vigenere Cipher</h2>
-          <p>Formula: E(x) = (x + k_i) mod 26, D(y) = (y - k_i) mod 26</p>
+          <p>Konsep inti: kunci kata diulang untuk menggeser huruf satu per satu.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="vigenere-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('vigenere', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('vigenere', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="vigenere-text">Input Text <span>*</span></label>
+            <label class="form-label" for="vigenere-text">Teks masukan <span>*</span></label>
             <textarea id="vigenere-text" placeholder="Attack at dawn"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="vigenere-key">Keyword <span>*</span></label>
+            <label class="form-label" for="vigenere-key">Kata kunci <span>*</span></label>
             <input type="text" id="vigenere-key" placeholder="SECRET" autocomplete="off" />
           </div>
-          <button class="btn-run" id="vigenere-run" type="button" onclick="runVigenere()">Encrypt</button>
+          <button class="btn-run" id="vigenere-run" type="button" onclick="runVigenere()">Pelajari</button>
           <div class="error-region" id="vigenere-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="vigenere-result-box">
-            <div class="result-label" id="vigenere-result-label">Encrypted Output</div>
+            <div class="result-label" id="vigenere-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="vigenere-result-text"></div>
             <button class="btn-copy" id="vigenere-copy-btn" type="button" onclick="copyResult('vigenere')">Copy</button>
           </div>
           <div class="process-box" id="vigenere-process">
-            <div class="empty-state">Run Vigenere to see keyword shifts aligned with each letter.</div>
+            <div class="empty-state">Jalankan Vigenere untuk melihat kata kunci dan pergeseran yang sejajar dengan tiap huruf.</div>
           </div>
         </div>
       </div>
@@ -173,46 +858,46 @@
         <div>
           <p class="section-kicker">Linear substitution</p>
           <h2>Affine Cipher</h2>
-          <p>Formula: E(x) = (ax + b) mod 26, D(y) = a^-1(y - b) mod 26</p>
+          <p>Konsep inti: kombinasi perkalian dan penjumlahan modular, lalu dibalik dengan invers a.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="affine-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('affine', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('affine', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="affine-text">Input Text <span>*</span></label>
+            <label class="form-label" for="affine-text">Teks masukan <span>*</span></label>
             <textarea id="affine-text" placeholder="Affine cipher"></textarea>
           </div>
           <div class="field-row">
             <div class="form-group">
-              <label class="form-label" for="affine-a">Key a <span>*</span></label>
+              <label class="form-label" for="affine-a">Kunci a <span>*</span></label>
               <input type="number" id="affine-a" placeholder="5" min="1" max="25" />
             </div>
             <div class="form-group">
-              <label class="form-label" for="affine-b">Key b <span>*</span></label>
+              <label class="form-label" for="affine-b">Kunci b <span>*</span></label>
               <input type="number" id="affine-b" placeholder="8" min="0" max="25" />
             </div>
           </div>
-          <p class="help-text">Valid a values: 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25</p>
-          <button class="btn-run" id="affine-run" type="button" onclick="runAffine()">Encrypt</button>
+          <p class="help-text">Nilai a yang valid adalah yang coprime terhadap 26.</p>
+          <button class="btn-run" id="affine-run" type="button" onclick="runAffine()">Pelajari</button>
           <div class="error-region" id="affine-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="affine-result-box">
-            <div class="result-label" id="affine-result-label">Encrypted Output</div>
+            <div class="result-label" id="affine-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="affine-result-text"></div>
             <button class="btn-copy" id="affine-copy-btn" type="button" onclick="copyResult('affine')">Copy</button>
           </div>
           <div class="process-box" id="affine-process">
-            <div class="empty-state">Run Affine to see modular arithmetic for each transformed letter.</div>
+            <div class="empty-state">Jalankan Affine untuk melihat aritmetika modular pada tiap huruf yang berubah.</div>
           </div>
         </div>
       </div>
@@ -224,7 +909,7 @@
         <div>
           <p class="section-kicker">Matrix polygraphic cipher</p>
           <h2>Hill Cipher</h2>
-          <p id="hill-subtitle">Formula: C = K x P mod 26 for a 2x2 key matrix</p>
+          <p id="hill-subtitle">Konsep inti: vektor huruf dikalikan matriks kunci lalu diambil modulo 26.</p>
         </div>
       </div>
 
@@ -232,14 +917,14 @@
         <div class="cipher-card">
           <div class="field-row">
             <div class="form-group">
-              <label class="form-label">Mode</label>
+              <label class="form-label">Mode belajar</label>
               <div class="segmented" id="hill-toggle">
                 <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('hill', 'encrypt', this)">Encrypt</button>
                 <button class="segment" type="button" data-mode="decrypt" onclick="setMode('hill', 'decrypt', this)">Decrypt</button>
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Matrix Size</label>
+              <label class="form-label">Ukuran matriks</label>
               <div class="segmented" id="hill-size-toggle">
                 <button class="segment active" id="hill-size-2" type="button" onclick="setHillSize(2, this)">2x2</button>
                 <button class="segment" id="hill-size-3" type="button" onclick="setHillSize(3, this)">3x3</button>
@@ -248,12 +933,12 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="hill-text">Input Text <span>*</span></label>
+            <label class="form-label" for="hill-text">Teks masukan <span>*</span></label>
             <textarea id="hill-text" placeholder="Letters are grouped and padded with X when needed"></textarea>
           </div>
 
           <div class="form-group" id="hill-matrix-2x2">
-            <label class="form-label">Key Matrix 2x2 <span>*</span></label>
+            <label class="form-label">Matriks kunci 2x2 <span>*</span></label>
             <div class="matrix-inputs matrix-2">
               <input type="number" id="hill-m00" placeholder="3" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-m01" placeholder="3" min="0" max="25" aria-label="row 1 column 2" />
@@ -264,7 +949,7 @@
           </div>
 
           <div class="form-group" id="hill-matrix-3x3" hidden>
-            <label class="form-label">Key Matrix 3x3 <span>*</span></label>
+            <label class="form-label">Matriks kunci 3x3 <span>*</span></label>
             <div class="matrix-inputs matrix-3">
               <input type="number" id="hill-n00" placeholder="6" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-n01" placeholder="24" min="0" max="25" aria-label="row 1 column 2" />
@@ -280,7 +965,7 @@
           </div>
 
           <div class="form-group" id="hill-matrix-6x6" hidden>
-            <label class="form-label">Key Matrix 6x6 <span>*</span></label>
+            <label class="form-label">Matriks kunci 6x6 <span>*</span></label>
             <div class="matrix-inputs matrix-6" style="--cols: 6;">
               <input type="number" id="hill-p00" value="1" min="0" max="25" aria-label="row 1 column 1" />
               <input type="number" id="hill-p01" value="0" min="0" max="25" aria-label="row 1 column 2" />
@@ -320,20 +1005,23 @@
               <input type="number" id="hill-p55" value="1" min="0" max="25" aria-label="row 6 column 6" />
             </div>
             <p class="help-text">Text is padded to a multiple of 6. The determinant must be coprime with 26. (Default: identity matrix)</p>
+          <div id="hill-6-warning" class="error-region" hidden>
+            Warning: 6x6 matrix inversion is computationally intensive and may be slow in-browser/server.
+          </div>
           </div>
 
-          <button class="btn-run" id="hill-run" type="button" onclick="runHill()">Encrypt</button>
+          <button class="btn-run" id="hill-run" type="button" onclick="runHill()">Pelajari</button>
           <div class="error-region" id="hill-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="hill-result-box">
-            <div class="result-label" id="hill-result-label">Encrypted Output</div>
+            <div class="result-label" id="hill-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="hill-result-text"></div>
             <button class="btn-copy" id="hill-copy-btn" type="button" onclick="copyResult('hill')">Copy</button>
           </div>
           <div class="process-box" id="hill-process">
-            <div class="empty-state">Run Hill to see the key matrix, vectors, and multiplication modulo 26.</div>
+            <div class="empty-state">Jalankan Hill untuk melihat matriks kunci, vektor huruf, dan perkalian modulo 26.</div>
           </div>
         </div>
       </div>
@@ -345,43 +1033,43 @@
         <div>
           <p class="section-kicker">Digraph substitution</p>
           <h2>Playfair Cipher</h2>
-          <p>Rules: same row shifts horizontally, same column shifts vertically, rectangle swaps columns.</p>
+          <p>Konsep inti: pasangan huruf mengikuti aturan baris, kolom, atau persegi pada tabel 5x5.</p>
         </div>
       </div>
 
       <div class="cipher-grid">
         <div class="cipher-card">
           <div class="form-group">
-            <label class="form-label">Mode</label>
+            <label class="form-label">Mode belajar</label>
             <div class="segmented" id="playfair-toggle">
               <button class="segment active" type="button" data-mode="encrypt" onclick="setMode('playfair', 'encrypt', this)">Encrypt</button>
               <button class="segment" type="button" data-mode="decrypt" onclick="setMode('playfair', 'decrypt', this)">Decrypt</button>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="playfair-text">Input Text <span>*</span></label>
+            <label class="form-label" for="playfair-text">Teks masukan <span>*</span></label>
             <textarea id="playfair-text" placeholder="Hide the gold"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label" for="playfair-key">Keyword <span>*</span></label>
+            <label class="form-label" for="playfair-key">Kata kunci <span>*</span></label>
             <input type="text" id="playfair-key" placeholder="MONARCHY" autocomplete="off" />
           </div>
           <div class="preview-panel" id="playfair-table-wrap" hidden>
-            <p class="form-label">Live 5x5 Key Square</p>
+            <p class="form-label">Kotak kunci 5x5 langsung</p>
             <div class="playfair-table" id="playfair-table-grid"></div>
           </div>
-          <button class="btn-run" id="playfair-run" type="button" onclick="runPlayfair()">Encrypt</button>
+          <button class="btn-run" id="playfair-run" type="button" onclick="runPlayfair()">Pelajari</button>
           <div class="error-region" id="playfair-error" role="alert"></div>
         </div>
 
         <div class="output-stack">
           <div class="result-box" id="playfair-result-box">
-            <div class="result-label" id="playfair-result-label">Encrypted Output</div>
+            <div class="result-label" id="playfair-result-label">Hasil pembelajaran</div>
             <div class="result-text" id="playfair-result-text"></div>
             <button class="btn-copy" id="playfair-copy-btn" type="button" onclick="copyResult('playfair')">Copy</button>
           </div>
           <div class="process-box" id="playfair-process">
-            <div class="empty-state">Run Playfair to see the 5x5 table, letter pairs, and rule used per pair.</div>
+            <div class="empty-state">Jalankan Playfair untuk melihat tabel 5x5, pasangan huruf, dan aturan yang dipakai tiap pasangan.</div>
           </div>
         </div>
       </div>
@@ -450,6 +1138,33 @@
       );
     }
 
+    // General determinant using recursive cofactor expansion (works for n<=6)
+    function detN(M) {
+      const n = M.length;
+      if (n === 0) return 0;
+      if (n === 1) return Number(M[0][0]);
+      if (n === 2) return det2(M);
+      if (n === 3) return det3(M);
+      let det = 0;
+      for (let c = 0; c < n; c++) {
+        // build submatrix excluding row 0 and column c
+        const sub = [];
+        for (let i = 1; i < n; i++) {
+          const row = [];
+          for (let j = 0; j < n; j++) if (j !== c) row.push(M[i][j]);
+          sub.push(row);
+        }
+        det += ((c % 2 === 0) ? 1 : -1) * Number(M[0][c]) * detN(sub);
+      }
+      return det;
+    }
+
+    function hillDeterminant(mat) {
+      // ensure numbers
+      const M = mat.map(r => r.map(v => Number(v)));
+      return detN(M);
+    }
+
     function inverseMatrix2(M) {
       const det = mod(det2(M));
       const invDet = modInverse(det);
@@ -503,6 +1218,9 @@
       document.getElementById('hill-subtitle').textContent = `Formula: C = K x P mod 26 for a ${n}x${n} key matrix`;
       document.getElementById('hill-process').innerHTML = '<div class="empty-state">Run Hill to see the key matrix, vectors, and multiplication modulo 26.</div>';
       hideError('hill');
+      // show warning for 6x6 matrices
+      const w = document.getElementById('hill-6-warning');
+      if (w) w.hidden = n !== 6;
     }
 
     function setLoading(cipher, loading) {
@@ -566,9 +1284,45 @@
           showError(cipher, data.error);
           return;
         }
+        // show result
         showResult(cipher, data.result, data.mode);
-        document.getElementById(`${cipher}-process`).innerHTML = processRenderer(data.result);
-        saveHistory(cipher, body.mode, body.text, data.result);
+
+        // prefer server-side steps when available
+        if (data.steps && Array.isArray(data.steps)) {
+          // choose formula by cipher
+          const formulas = {
+            caesar: body.mode === 'encrypt' ? 'E(x) = (x + k) mod 26' : 'D(y) = (y - k) mod 26',
+            vigenere: body.mode === 'encrypt' ? 'E(x) = (x + k_i) mod 26' : 'D(y) = (y - k_i) mod 26',
+            affine: body.mode === 'encrypt' ? 'E(x) = (ax + b) mod 26' : 'D(y) = a^-1(y - b) mod 26',
+            hill: body.mode === 'encrypt' ? 'C = K x P mod 26' : 'P = K^-1 x C mod 26',
+            playfair: 'Playfair digraph rules'
+          };
+
+          let bodyHtml = '';
+          if (cipher === 'hill') {
+            // render matrix and inverse info if present
+            if (data.matrix) {
+              bodyHtml += renderMatrix(data.matrix, `Key matrix K, det(K) = ${data.determinant} (mod26=${data.det_mod26})`);
+              if (data.inverse) bodyHtml += renderMatrix(data.inverse, 'Inverse matrix (mod26)');
+            }
+            bodyHtml += stepList(data.steps || []);
+          } else if (cipher === 'playfair' && data.table) {
+            bodyHtml += renderPlayfairGrid(data.table);
+            bodyHtml += stepList(data.steps || []);
+          } else {
+            bodyHtml = stepList(data.steps || []);
+          }
+
+          document.getElementById(`${cipher}-process`).innerHTML = processShell(`${cipher.toUpperCase()} process`, formulas[cipher] || '', bodyHtml);
+          // initialize step player (play/pause/next/prev + highlight) for server-provided steps
+          initStepPlayer(document.getElementById(`${cipher}-process`), cipher);
+        } else {
+          // fallback to client-side renderer
+          document.getElementById(`${cipher}-process`).innerHTML = processRenderer(data.result);
+        }
+
+        // save history to server
+        await saveHistory(cipher, body.mode, body.text, data.result);
       } catch (error) {
         hideResult(cipher);
         showError(cipher, 'Unable to reach the cipher service. Please try again.');
@@ -593,7 +1347,68 @@
     function stepList(items) {
       const limited = items.slice(0, 24);
       const more = items.length > limited.length ? `<li class="muted-step">Showing first ${limited.length} of ${items.length} letter steps.</li>` : '';
-      return `<ol class="step-list">${limited.map(item => `<li>${item}</li>`).join('')}${more}</ol>`;
+      return `<ol class="step-list">${limited.map((item, i) => `<li class="step-item" data-step-index="${i}">${item}</li>`).join('')}${more}</ol>`;
+    }
+
+    function initStepPlayer(container, cipher) {
+      try {
+        const list = container.querySelector('.step-list');
+        if (!list) return;
+        const items = Array.from(list.querySelectorAll('li.step-item'));
+        if (!items.length) return;
+
+        // remove existing controls if re-rendering
+        const existing = container.querySelector('.step-player');
+        if (existing) existing.remove();
+
+        const controls = document.createElement('div');
+        controls.className = 'step-player';
+        controls.innerHTML = `<button class="prev">Prev</button><button class="play">Play</button><button class="pause" style="display:none">Pause</button><button class="next">Next</button><label style="margin-left:8px">Delay <input class="speed" type="number" min="100" value="800">ms</label>`;
+        list.parentNode.insertBefore(controls, list);
+
+        const state = { timer: null, idx: 0, playing: false };
+
+        function highlight(i) {
+          items.forEach((li, j) => li.classList.toggle('step-active', j === i));
+          const el = items[i];
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          state.idx = i;
+        }
+
+        function pause() {
+          state.playing = false;
+          controls.querySelector('.play').style.display = '';
+          controls.querySelector('.pause').style.display = 'none';
+          if (state.timer) { clearInterval(state.timer); state.timer = null; }
+        }
+
+        function play() {
+          if (state.playing) return;
+          state.playing = true;
+          controls.querySelector('.play').style.display = 'none';
+          controls.querySelector('.pause').style.display = '';
+          const speed = parseInt(controls.querySelector('.speed').value, 10) || 800;
+          state.timer = setInterval(() => {
+            const next = state.idx + 1;
+            if (next >= items.length) { pause(); }
+            else highlight(next);
+          }, speed);
+        }
+
+        controls.querySelector('.play').addEventListener('click', play);
+        controls.querySelector('.pause').addEventListener('click', pause);
+        controls.querySelector('.prev').addEventListener('click', () => { pause(); highlight(Math.max(0, state.idx - 1)); });
+        controls.querySelector('.next').addEventListener('click', () => { pause(); highlight(Math.min(items.length - 1, state.idx + 1)); });
+        controls.querySelector('.speed').addEventListener('change', () => { if (state.playing) { pause(); play(); } });
+
+        items.forEach((li, i) => li.addEventListener('click', () => { pause(); highlight(i); }));
+
+        highlight(0);
+
+        container._stepPlayerState = state;
+      } catch (e) {
+        console.warn('initStepPlayer error', e);
+      }
     }
 
     function renderMatrix(M, label = '') {
@@ -611,62 +1426,8 @@
       return `<div class="playfair-table process-table">${table.flat().map(ch => `<span class="pf-cell">${ch}</span>`).join('')}</div>`;
     }
 
-    function caesarProcess(text, shift, mode) {
-      const direction = mode === 'encrypt' ? 1 : -1;
-      const cleanShift = mod(Number(shift || 0));
-      const steps = [...text].filter(ch => /[a-z]/i.test(ch)).map(ch => {
-        const x = charValue(ch);
-        const y = mod(x + direction * cleanShift);
-        const op = direction > 0 ? '+' : '-';
-        return `<code>${esc(ch.toUpperCase())}</code>: (${x} ${op} ${cleanShift}) mod 26 = ${y} -> <strong>${valueChar(y)}</strong>`;
-      });
-      return processShell(
-        'Caesar shift calculation',
-        mode === 'encrypt' ? 'E(x) = (x + k) mod 26' : 'D(y) = (y - k) mod 26',
-        stepList(steps.length ? steps : ['No alphabetic characters were transformed.'])
-      );
-    }
-
-    function vigenereProcess(text, key, mode) {
-      const cleanKey = key.toUpperCase().replace(/[^A-Z]/g, '');
-      let keyIndex = 0;
-      const steps = [];
-      for (const ch of text) {
-        if (!/[a-z]/i.test(ch)) continue;
-        const kch = cleanKey[keyIndex % cleanKey.length];
-        const shift = charValue(kch);
-        const x = charValue(ch);
-        const y = mode === 'encrypt' ? mod(x + shift) : mod(x - shift);
-        const op = mode === 'encrypt' ? '+' : '-';
-        steps.push(`<code>${esc(ch.toUpperCase())}</code> with key <code>${kch}</code>: (${x} ${op} ${shift}) mod 26 = ${y} -> <strong>${valueChar(y)}</strong>`);
-        keyIndex += 1;
-      }
-      return processShell(
-        'Keyword-aligned shifts',
-        mode === 'encrypt' ? 'E(x) = (x + k_i) mod 26' : 'D(y) = (y - k_i) mod 26',
-        stepList(steps)
-      );
-    }
-
-    function affineProcess(text, a, b, mode) {
-      const aVal = Number(a);
-      const bVal = mod(Number(b));
-      const aInv = modInverse(aVal);
-      const steps = [...text].filter(ch => /[a-z]/i.test(ch)).map(ch => {
-        const x = charValue(ch);
-        const y = mode === 'encrypt' ? mod(aVal * x + bVal) : mod(aInv * (x - bVal));
-        const calc = mode === 'encrypt'
-          ? `(${aVal} x ${x} + ${bVal}) mod 26`
-          : `${aInv} x (${x} - ${bVal}) mod 26`;
-        return `<code>${esc(ch.toUpperCase())}</code>: ${calc} = ${y} -> <strong>${valueChar(y)}</strong>`;
-      });
-      const inverseNote = mode === 'decrypt' ? `<p class="note">a^-1 for ${aVal} mod 26 is ${aInv}.</p>` : '';
-      return processShell(
-        'Affine modular transformation',
-        mode === 'encrypt' ? 'E(x) = (ax + b) mod 26' : 'D(y) = a^-1(y - b) mod 26',
-        `${inverseNote}${stepList(steps)}`
-      );
-    }
+    // Note: step-by-step calculations are now provided by the server (server-side `steps`).
+    // Client-side calculation functions removed to keep a single source of truth.
 
     function getHillMatrix() {
       if (hillSize === 2) {
@@ -693,47 +1454,7 @@
       ].map(row => row.map(id => document.getElementById(id).value.trim()));
     }
 
-    function hillProcess(text, matrix, mode) {
-      const numericMatrix = matrix.map(row => row.map(value => mod(Number(value))));
-      const n = numericMatrix.length;
-      const workingMatrix = mode === 'decrypt'
-        ? (n === 2 ? inverseMatrix2(numericMatrix) : inverseMatrix3(numericMatrix))
-        : numericMatrix;
-      const letters = text.toUpperCase().replace(/[^A-Z]/g, '').split('');
-      while (letters.length % n !== 0) letters.push('X');
-      const blocks = [];
-      for (let i = 0; i < letters.length; i += n) blocks.push(letters.slice(i, i + n));
-      const rows = blocks.map(block => {
-        const vector = block.map(charValue);
-        const outputs = workingMatrix.map(row => row.reduce((sum, value, index) => sum + value * vector[index], 0));
-        const modded = outputs.map(value => mod(value));
-        const lettersOut = modded.map(valueChar).join('');
-        const calc = workingMatrix.map((row, rowIndex) => {
-          const terms = row.map((value, index) => `${value}*${vector[index]}`).join(' + ');
-          return `row ${rowIndex + 1}: (${terms}) mod 26 = ${modded[rowIndex]}`;
-        }).join('<br>');
-        return `
-          <div class="calc-card">
-            <strong>${block.join('')} -> ${lettersOut}</strong>
-            <p>Vector: [${vector.join(', ')}]</p>
-            <p>${calc}</p>
-          </div>
-        `;
-      }).join('');
-      const det = mod(n === 2 ? det2(numericMatrix) : det3(numericMatrix));
-      const inverse = mode === 'decrypt' ? renderMatrix(workingMatrix, 'Inverse matrix used for decryption') : '';
-      return processShell(
-        'Hill matrix multiplication',
-        mode === 'encrypt' ? 'C = K x P mod 26' : 'P = K^-1 x C mod 26',
-        `
-          <div class="matrix-showcase">
-            ${renderMatrix(numericMatrix, `Key matrix K, det(K) mod 26 = ${det}`)}
-            ${inverse}
-          </div>
-          <div class="calc-grid">${rows}</div>
-        `
-      );
-    }
+    // Hill step-by-step is provided by the server. Client-side hillProcess removed.
 
     function buildPlayfairTable(key) {
       const seen = new Set();
@@ -757,99 +1478,58 @@
       return [-1, -1];
     }
 
-    function playfairPairs(text) {
-      const letters = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '').split('');
-      const pairs = [];
-      let i = 0;
-      while (i < letters.length) {
-        const a = letters[i];
-        const b = letters[i + 1];
-        if (!b) {
-          pairs.push([a, 'X', 'pad final letter']);
-          i += 1;
-        } else if (a === b) {
-          pairs.push([a, 'X', 'insert X between repeated letters']);
-          i += 1;
-        } else {
-          pairs.push([a, b, 'natural pair']);
-          i += 2;
-        }
-      }
-      return pairs;
-    }
+    // Playfair detailed steps are provided by server; client-side step generator removed.
 
-    function playfairProcess(text, key, mode) {
-      const table = buildPlayfairTable(key);
-      const pairs = playfairPairs(text);
-      const rows = pairs.map(([a, b, prep]) => {
-        const [ra, ca] = playfairPos(table, a);
-        const [rb, cb] = playfairPos(table, b);
-        let out;
-        let rule;
-        if (ra === rb) {
-          const shift = mode === 'encrypt' ? 1 : -1;
-          out = `${table[ra][mod(ca + shift, 5)]}${table[rb][mod(cb + shift, 5)]}`;
-          rule = mode === 'encrypt' ? 'same row: shift right' : 'same row: shift left';
-        } else if (ca === cb) {
-          const shift = mode === 'encrypt' ? 1 : -1;
-          out = `${table[mod(ra + shift, 5)][ca]}${table[mod(rb + shift, 5)][cb]}`;
-          rule = mode === 'encrypt' ? 'same column: shift down' : 'same column: shift up';
-        } else {
-          out = `${table[ra][cb]}${table[rb][ca]}`;
-          rule = 'rectangle: swap columns';
-        }
-        return `<div class="calc-card"><strong>${a}${b} -> ${out}</strong><p>${prep}; ${rule}</p><p>${a}=(${ra + 1},${ca + 1}), ${b}=(${rb + 1},${cb + 1})</p></div>`;
-      }).join('');
-      return processShell(
-        'Playfair key square and digraphs',
-        'I/J share one cell; process text two letters at a time',
-        `${renderPlayfairGrid(table)}<div class="calc-grid">${rows}</div>`
-      );
-    }
-
-    function getHistory() {
+    async function getHistory() {
       try {
-        return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        const res = await fetch('/api/history');
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.history || [];
       } catch {
         return [];
       }
     }
 
-    function saveHistory(cipher, mode, input, output) {
-      const history = getHistory();
-      history.unshift({
-        cipher,
-        mode,
-        input,
-        output,
-        time: new Date().toLocaleString()
-      });
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+    async function saveHistory(cipher, mode, input, output) {
+      try {
+        await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ algorithm: cipher, mode, text: input, result: output })
+        });
+      } catch (e) {
+        console.error('Failed saving history to server', e);
+      }
       renderHistory();
     }
 
-    function clearHistory() {
-      localStorage.removeItem(HISTORY_KEY);
+    async function clearHistory() {
+      try {
+        await fetch('/api/history', { method: 'DELETE' });
+      } catch (e) {
+        console.error('Failed clearing history on server', e);
+      }
       renderHistory();
     }
 
-    function renderHistory() {
+    async function renderHistory() {
       const el = document.getElementById('history-list');
-      const history = getHistory();
+      const history = await getHistory();
       if (!history.length) {
-        el.className = 'history-list empty';
+        el.className = 'history-list empty history-scroll';
         el.textContent = 'No encryption or decryption history yet.';
         return;
       }
-      el.className = 'history-list';
-      el.innerHTML = history.map(item => `
+      el.className = 'history-list history-scroll';
+      el.innerHTML = history.slice().reverse().map(item => `
         <article class="history-item">
           <div>
-            <strong>${esc(item.cipher)} / ${esc(item.mode)}</strong>
-            <span>${esc(item.time)}</span>
+            <strong>${esc(item.algorithm || item.cipher || 'unknown')} / ${esc(item.mode)}</strong>
+            <span>${esc(item.time || '')}</span>
           </div>
-          <p><span>Input</span>${esc(item.input)}</p>
-          <p><span>Output</span>${esc(item.output)}</p>
+          <p><span>Input</span>${esc(item.text || item.input || '')}</p>
+          <p><span>Output</span>${esc(item.result || item.output || '')}</p>
         </article>
       `).join('');
     }
@@ -857,33 +1537,64 @@
     async function runCaesar() {
       const text = document.getElementById('caesar-text').value.trim();
       const shift = document.getElementById('caesar-shift').value.trim();
-      await callAPI('/api/caesar', { text, shift, mode: state.caesar.mode }, 'caesar', () => caesarProcess(text, shift, state.caesar.mode));
+      await callAPI('/api/caesar', { text, shift, mode: state.caesar.mode }, 'caesar');
     }
 
     async function runVigenere() {
       const text = document.getElementById('vigenere-text').value.trim();
       const key = document.getElementById('vigenere-key').value.trim();
-      await callAPI('/api/vigenere', { text, key, mode: state.vigenere.mode }, 'vigenere', () => vigenereProcess(text, key, state.vigenere.mode));
+      await callAPI('/api/vigenere', { text, key, mode: state.vigenere.mode }, 'vigenere');
     }
 
     async function runAffine() {
       const text = document.getElementById('affine-text').value.trim();
       const a = document.getElementById('affine-a').value.trim();
       const b = document.getElementById('affine-b').value.trim();
-      await callAPI('/api/affine', { text, a, b, mode: state.affine.mode }, 'affine', () => affineProcess(text, a, b, state.affine.mode));
+      await callAPI('/api/affine', { text, a, b, mode: state.affine.mode }, 'affine');
     }
 
     async function runHill() {
       const text = document.getElementById('hill-text').value.trim();
       const matrix = getHillMatrix();
-      const key_matrix = matrix.flat();
-      await callAPI('/api/hill', { text, key_matrix, size: hillSize, mode: state.hill.mode }, 'hill', () => hillProcess(text, matrix, state.hill.mode));
+      // flatten and validate
+      const key_flat = matrix.flat();
+      const expected = hillSize * hillSize;
+      // ensure all entries present and are integers
+      if (key_flat.length !== expected) {
+        showError('hill', `Kunci matriks tidak lengkap: diharapkan ${expected} nilai.`);
+        return;
+      }
+      const parsed = [];
+      for (let i = 0; i < key_flat.length; i++) {
+        const v = String(key_flat[i]).trim();
+        if (v === '') {
+          showError('hill', `Isi semua sel matriks sebelum menjalankan. Sel ke-${i + 1} kosong.`);
+          return;
+        }
+        const n = Number(v);
+        if (!Number.isInteger(n)) {
+          showError('hill', `Nilai pada sel ke-${i + 1} bukan integer yang valid.`);
+          return;
+        }
+        parsed.push(((n % 26) + 26) % 26);
+      }
+
+      // Check determinant and invertibility before calling API when decrypting
+      const det = hillDeterminant(matrix);
+      const detMod = ((det % 26) + 26) % 26;
+      const inv = gcd(detMod, 26) === 1;
+      if (state.hill.mode === 'decrypt' && !inv) {
+        showError('hill', `Matriks tidak dapat dibalik: det(K)=${det} (mod26=${detMod}) bukan koprima dengan 26.`);
+        return;
+      }
+
+      await callAPI('/api/hill', { text, key_matrix: parsed, size: hillSize, mode: state.hill.mode }, 'hill');
     }
 
     async function runPlayfair() {
       const text = document.getElementById('playfair-text').value.trim();
       const key = document.getElementById('playfair-key').value.trim();
-      await callAPI('/api/playfair', { text, key, mode: state.playfair.mode }, 'playfair', () => playfairProcess(text, key, state.playfair.mode));
+      await callAPI('/api/playfair', { text, key, mode: state.playfair.mode }, 'playfair');
     }
 
     function renderPlayfairPreview(key) {
@@ -898,10 +1609,20 @@
     }
 
     document.getElementById('theme-toggle').addEventListener('click', () => {
-      setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+      const currentTheme = document.documentElement.dataset.theme || 'light';
+      setTheme(currentTheme === 'dark' ? 'light' : 'dark');
     });
 
+    // Apply saved theme on page load
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+    setTheme(savedTheme);
+
     document.getElementById('playfair-key').addEventListener('input', e => renderPlayfairPreview(e.target.value.trim()));
+
+    // Mobile viewport optimization
+    if (window.innerWidth <= 768) {
+      document.querySelector('main').style.zIndex = '1';
+    }
 
     [
       ['caesar-shift', runCaesar],
@@ -940,7 +1661,7 @@
       document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 8);
     }, { passive: true });
 
-    setTheme(localStorage.getItem(THEME_KEY) || 'light');
+
     renderHistory();
   </script>
 </body>
